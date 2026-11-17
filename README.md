@@ -222,22 +222,6 @@ Validasi berjalan dua lapis: atribut HTML5 (`required`, `min`, `minlength`, `typ
 | UI/UX konsisten | Satu sistem warna dan komponen di seluruh halaman |
 | HTML5, CSS3, Vanilla JS | Tanpa framework frontend |
 
-## Rencana Pengembangan
-
-- [ ] Grafik pendapatan dengan Chart.js
-- [ ] Export data pesanan ke CSV
-- [ ] Deployment ke GitHub Pages
-- [ ] Pesan error langsung di bawah field form
-- [ ] Pengecekan nomor telepon duplikat
-- [ ] Ubah status pesanan langsung dari tabel
-
-## Pembagian Tugas
-
-| Anggota | Kontribusi |
-|---|---|
-| isi nama | isi bagian yang dikerjakan |
-| isi nama | isi bagian yang dikerjakan |
-| isi nama | isi bagian yang dikerjakan |
 
 ---
 
