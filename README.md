@@ -2,7 +2,7 @@
 
 Aplikasi web interaktif untuk mengelola pesanan dan pelanggan usaha laundry. Dibuat sebagai **Final Project Web Design: Interactive Web Application Development** menggunakan **HTML5, CSS3, dan Vanilla JavaScript** (tanpa framework).
 
-> **Anggota kelompok:** isi nama dan NIM anggota di sini
+> **Anggota kelompok:** Korompis, Marselino Jibryl (105012510061)
 > **Mata kuliah / dosen:** isi di sini
 
 ---
