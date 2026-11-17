@@ -22,17 +22,84 @@ const esc = s =>
   }[c]));
 
 const seed = {
-  customers: [],
-  orders: []
+  customers: [
+    { id: 1, name: "Budi Santoso", phone: "081234567890", address: "Jl. Merdeka No. 12" },
+    { id: 2, name: "Siti Aminah", phone: "082198765432", address: "Jl. Sudirman No. 45" },
+    { id: 3, name: "Andi Pratama", phone: "085712345678", address: "Jl. Diponegoro No. 8" },
+    { id: 4, name: "Dewi Lestari", phone: "081387654321", address: "Jl. Ahmad Yani No. 23" }
+  ],
+  orders: [
+    {
+      id: 1,
+      customerId: 1,
+      service: "Cuci & Setrika",
+      weight: 3.5,
+      price: 7000,
+      status: "Selesai",
+      payment: "Lunas",
+      date: today(),
+      note: "Parfum sakura"
+    },
+    {
+      id: 2,
+      customerId: 2,
+      service: "Laundry Express",
+      weight: 2,
+      price: 12000,
+      status: "Diproses",
+      payment: "Lunas",
+      date: today(),
+      note: "Selesai sore"
+    },
+    {
+      id: 3,
+      customerId: 3,
+      service: "Cuci Kering",
+      weight: 4,
+      price: 5000,
+      status: "Menunggu",
+      payment: "Belum Lunas",
+      date: today(),
+      note: ""
+    },
+    {
+      id: 4,
+      customerId: 4,
+      service: "Setrika",
+      weight: 2.5,
+      price: 5000,
+      status: "Selesai",
+      payment: "Belum Lunas",
+      date: today(),
+      note: "Lipat rapi"
+    }
+  ]
 };
 
 /* ---------- Data ---------- */
 
+function cloneSeed() {
+  return {
+    customers: seed.customers.map(c => ({ ...c })),
+    orders: seed.orders.map(o => ({ ...o }))
+  };
+}
+
 function loadData() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || seed;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return cloneSeed();
+    const parsed = JSON.parse(raw);
+    if (
+      parsed &&
+      Array.isArray(parsed.customers) &&
+      Array.isArray(parsed.orders)
+    ) {
+      return parsed;
+    }
+    return cloneSeed();
   } catch (e) {
-    return seed;
+    return cloneSeed();
   }
 }
 
@@ -63,12 +130,15 @@ function orderTotal(o) {
   return Math.round(Number(o.weight) * Number(o.price));
 }
 
+let toastTimer = null;
+
 function toast(message) {
   const el = document.getElementById("toast");
   if (!el) return;
   el.textContent = message;
   el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 2600);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
 }
 
 function statusClass(s) {
@@ -194,10 +264,22 @@ function navSetup() {
     })
   );
 
+  const sidebar = document.querySelector(".sidebar");
   const menu = document.querySelector(".mobile-menu");
-  menu?.addEventListener("click", () =>
-    document.querySelector(".sidebar").classList.toggle("open")
-  );
+  menu?.addEventListener("click", e => {
+    e.stopPropagation();
+    sidebar?.classList.toggle("open");
+  });
+
+  document.addEventListener("click", e => {
+    if (
+      sidebar?.classList.contains("open") &&
+      !sidebar.contains(e.target) &&
+      e.target !== menu
+    ) {
+      sidebar.classList.remove("open");
+    }
+  });
 }
 
 /* ---------- Dashboard ---------- */
@@ -252,13 +334,20 @@ function renderOrders() {
     ? rows
         .map(
           o =>
-            `<tr><td><strong>#${o.id}</strong></td><td><div class="customer-cell"><span class="mini-avatar">${esc(customerName(o.customerId).charAt(0))}</span>${esc(customerName(o.customerId))}</div></td><td>${esc(o.service)}</td><td>${o.weight} kg</td><td>${money(orderTotal(o))}</td><td><span class="status ${statusClass(o.status)}">${o.status}</span></td><td><span class="pay ${paymentClass(o.payment)}">${o.payment}</span></td><td><div class="actions"><button class="icon-btn" title="Edit" onclick="editOrder(${o.id})">✎</button><button class="icon-btn" title="Hapus" onclick="deleteOrder(${o.id})">⌫</button></div></td></tr>`
+            `<tr><td><strong>#${o.id}</strong></td><td><div class="customer-cell"><span class="mini-avatar">${esc(customerName(o.customerId).trim().charAt(0).toUpperCase() || "?")}</span>${esc(customerName(o.customerId))}</div></td><td>${esc(o.service)}</td><td>${o.weight} kg</td><td>${money(orderTotal(o))}</td><td><span class="status ${statusClass(o.status)}">${o.status}</span></td><td><span class="pay ${paymentClass(o.payment)}">${o.payment}</span></td><td><div class="actions"><button class="icon-btn" title="Edit" onclick="editOrder(${o.id})">✎</button><button class="icon-btn" title="Hapus" onclick="deleteOrder(${o.id})">⌫</button></div></td></tr>`
         )
         .join("")
     : `<tr><td colspan="8" class="empty">Data pesanan tidak ditemukan.</td></tr>`;
 }
 
 function openOrderModal(id = null) {
+  if (!db.customers.length) {
+    toast("Tambahkan pelanggan terlebih dahulu.");
+    showView("customers");
+    openCustomerModal();
+    return;
+  }
+
   const modal = document.getElementById("order-modal");
   const form = document.getElementById("order-form");
   if (!modal || !form) return;
@@ -318,6 +407,7 @@ function submitOrder(e) {
   const customerId = Number(document.getElementById("order-customer").value);
   const weight = Number(document.getElementById("order-weight").value);
   const price = Number(document.getElementById("order-price").value);
+  const date = document.getElementById("order-date").value;
 
   if (!customerId) {
     toast("Tambahkan pelanggan terlebih dahulu.");
@@ -325,6 +415,10 @@ function submitOrder(e) {
   }
   if (weight <= 0 || price <= 0) {
     toast("Berat dan harga harus lebih dari 0.");
+    return;
+  }
+  if (!date) {
+    toast("Tanggal masuk wajib diisi.");
     return;
   }
 
@@ -336,7 +430,7 @@ function submitOrder(e) {
     price,
     status: document.getElementById("order-status").value,
     payment: document.getElementById("order-payment").value,
-    date: document.getElementById("order-date").value,
+    date,
     note: document.getElementById("order-note").value.trim()
   };
 
@@ -368,7 +462,7 @@ function renderCustomers() {
     ? rows
         .map(
           c =>
-            `<tr><td><div class="customer-cell"><span class="mini-avatar">${esc(c.name.charAt(0))}</span><strong>${esc(c.name)}</strong></div></td><td>${esc(c.phone)}</td><td>${esc(c.address)}</td><td>${db.orders.filter(o => o.customerId === c.id).length} pesanan</td><td><div class="actions"><button class="icon-btn" onclick="editCustomer(${c.id})" title="Edit">✎</button><button class="icon-btn" onclick="deleteCustomer(${c.id})" title="Hapus">⌫</button></div></td></tr>`
+            `<tr><td><div class="customer-cell"><span class="mini-avatar">${esc(c.name.trim().charAt(0).toUpperCase() || "?")}</span><strong>${esc(c.name)}</strong></div></td><td>${esc(c.phone)}</td><td>${esc(c.address)}</td><td>${db.orders.filter(o => o.customerId === c.id).length} pesanan</td><td><div class="actions"><button class="icon-btn" onclick="editCustomer(${c.id})" title="Edit">✎</button><button class="icon-btn" onclick="deleteCustomer(${c.id})" title="Hapus">⌫</button></div></td></tr>`
         )
         .join("")
     : `<tr><td colspan="5" class="empty">Pelanggan tidak ditemukan.</td></tr>`;
@@ -512,6 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") {
       closeOrderModal();
       closeCustomerModal();
+      document.querySelector(".sidebar")?.classList.remove("open");
     }
   });
 
