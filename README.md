@@ -6,7 +6,8 @@ Aplikasi web interaktif untuk mengelola pesanan dan pelanggan usaha laundry. Dib
 > Mongan,Blessi Evangely (105012510044)
 > Tulong,Laura Kathleen Pathfinderly Tabita Jr (105022428001)
 > Kaeng, Petra Putra Anugrah (105032410023)
-> **Mata kuliah / dosen:** isi di sini
+> Yong, Herul Sabbathface (105022510015)
+> **Mata kuliah / dosen:** Web Design (sir Reggy Najoan)
 
 ---
 
@@ -225,7 +226,7 @@ Validasi berjalan dua lapis: atribut HTML5 (`required`, `min`, `minlength`, `typ
 | UI/UX konsisten | Satu sistem warna dan komponen di seluruh halaman |
 | HTML5, CSS3, Vanilla JS | Tanpa framework frontend |
 
-
+https://lauratulong.github.io/BobasoFinalProject/
 ---
 
 © 2026 BobasoLaundry · Final Project Web Design
