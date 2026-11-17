@@ -119,7 +119,7 @@ function renderAll() {
 /* ---------- Helpers ---------- */
 
 function nextId(list) {
-  return list.length ? Math.max(...list.map(x => x.id)) + 1 : 1;
+  return list.length ? Math.max(...list.map(x => Number(x.id) || 0)) + 1 : 1;
 }
 
 function customerName(id) {
@@ -160,8 +160,9 @@ function setText(id, value) {
 
 function downloadCSV(filename, headers, rows) {
   const escapeCSV = val => {
-    const str = String(val ?? "");
-    return /[",\n\r]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+    const raw = String(val ?? "");
+    const safe = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+    return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
   };
   const csvContent =
     "\uFEFF" +
@@ -175,7 +176,7 @@ function downloadCSV(filename, headers, rows) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function exportOrdersCSV() {
@@ -413,7 +414,7 @@ function submitOrder(e) {
     toast("Tambahkan pelanggan terlebih dahulu.");
     return;
   }
-  if (weight <= 0 || price <= 0) {
+  if (!Number.isFinite(weight) || !Number.isFinite(price) || weight <= 0 || price <= 0) {
     toast("Berat dan harga harus lebih dari 0.");
     return;
   }
@@ -580,7 +581,7 @@ function renderReports() {
           .sort((a, b) => b.id - a.id)
           .map(
             o =>
-              `<tr><td>#${o.id}</td><td>${o.date}</td><td>${esc(customerName(o.customerId))}</td><td>${esc(o.service)}</td><td>${money(orderTotal(o))}</td><td><span class="pay ${paymentClass(o.payment)}">${o.payment}</span></td></tr>`
+              `<tr><td>#${o.id}</td><td>${esc(o.date)}</td><td>${esc(customerName(o.customerId))}</td><td>${esc(o.service)}</td><td>${money(orderTotal(o))}</td><td><span class="pay ${paymentClass(o.payment)}">${o.payment}</span></td></tr>`
           )
           .join("")
       : `<tr><td colspan="6" class="empty">Belum ada transaksi.</td></tr>`;
