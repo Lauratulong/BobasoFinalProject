@@ -5,6 +5,7 @@ Aplikasi web interaktif untuk mengelola pesanan dan pelanggan usaha laundry. Dib
 > **Anggota kelompok:** Korompis, Marselino Jibryl (105012510061)
 > Mongan,Blessi Evangely (105012510044)
 > Tulong,Laura Kathleen Pathfinderly Tabita Jr (105022428001)
+> Kaeng, Petra Putra Anugrah (105032410023)
 > **Mata kuliah / dosen:** isi di sini
 
 ---
