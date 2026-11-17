@@ -116,7 +116,7 @@ cd <nama-repository>
 2. Pada **Source**, pilih branch `main` dan folder `/ (root)`.
 3. Simpan, lalu buka alamat yang ditampilkan GitHub.
 
-> **Catatan:** data tersimpan di Local Storage browser dan perangkat yang dipakai. Membuka aplikasi di browser atau perangkat lain akan menampilkan data awal (contoh) kembali.
+> **Catatan:** data tersimpan di Local Storage browser dan perangkat yang dipakai. Membuka aplikasi di browser atau perangkat lain akan memulai dengan data kosong.
 
 ## Cara Penggunaan
 
@@ -127,11 +127,11 @@ cd <nama-repository>
 5. **Ubah atau hapus** — gunakan tombol ✎ (ubah) dan ⌫ (hapus) pada baris data. Penghapusan meminta konfirmasi.
 6. **Laporan** — lihat rekap pembayaran dan status. Klik **Cetak Laporan** untuk mencetak.
 
-### Data awal
+### Reset data
 
-Saat pertama kali dibuka, aplikasi berisi 4 pelanggan dan 4 pesanan contoh. Data ini akan diganti dengan data Anda begitu ada perubahan pertama.
+Saat pertama kali dibuka, aplikasi dimulai dalam keadaan kosong tanpa data contoh. Tambahkan pelanggan terlebih dahulu sebelum mencatat pesanan.
 
-Untuk mengembalikan data awal, hapus data situs di browser atau jalankan di Console:
+Untuk menghapus seluruh data tersimpan, hapus data situs di browser atau jalankan di Console:
 
 ```js
 localStorage.removeItem("laundryku_data_v1"); location.reload();
