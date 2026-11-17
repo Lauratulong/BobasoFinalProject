@@ -22,58 +22,8 @@ const esc = s =>
   }[c]));
 
 const seed = {
-  customers: [
-    { id: 1, name: "Budi Santoso", phone: "081234567890", address: "Jl. Merdeka No. 12" },
-    { id: 2, name: "Siti Aminah", phone: "082198765432", address: "Jl. Sudirman No. 45" },
-    { id: 3, name: "Andi Pratama", phone: "085712345678", address: "Jl. Diponegoro No. 8" },
-    { id: 4, name: "Dewi Lestari", phone: "081387654321", address: "Jl. Ahmad Yani No. 23" }
-  ],
-  orders: [
-    {
-      id: 1,
-      customerId: 1,
-      service: "Cuci & Setrika",
-      weight: 3.5,
-      price: 7000,
-      status: "Selesai",
-      payment: "Lunas",
-      date: today(),
-      note: "Parfum sakura"
-    },
-    {
-      id: 2,
-      customerId: 2,
-      service: "Laundry Express",
-      weight: 2,
-      price: 12000,
-      status: "Diproses",
-      payment: "Lunas",
-      date: today(),
-      note: "Selesai sore"
-    },
-    {
-      id: 3,
-      customerId: 3,
-      service: "Cuci Kering",
-      weight: 4,
-      price: 5000,
-      status: "Menunggu",
-      payment: "Belum Lunas",
-      date: today(),
-      note: ""
-    },
-    {
-      id: 4,
-      customerId: 4,
-      service: "Setrika",
-      weight: 2.5,
-      price: 5000,
-      status: "Selesai",
-      payment: "Belum Lunas",
-      date: today(),
-      note: "Lipat rapi"
-    }
-  ]
+  customers: [],
+  orders: []
 };
 
 /* ---------- Data ---------- */
