@@ -88,6 +88,86 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function downloadCSV(filename, headers, rows) {
+  const escapeCSV = val => {
+    const str = String(val ?? "");
+    return /[",\n\r]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  };
+  const csvContent =
+    "\uFEFF" +
+    [headers, ...rows].map(row => row.map(escapeCSV).join(",")).join("\r\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportOrdersCSV() {
+  if (!db.orders.length) {
+    toast("Belum ada data pesanan untuk diekspor.");
+    return;
+  }
+  const headers = [
+    "ID Pesanan",
+    "Tanggal",
+    "Pelanggan",
+    "Layanan",
+    "Berat (kg)",
+    "Harga/kg (Rp)",
+    "Total (Rp)",
+    "Status",
+    "Pembayaran",
+    "Catatan"
+  ];
+  const rows = [...db.orders]
+    .sort((a, b) => a.id - b.id)
+    .map(o => [
+      o.id,
+      o.date,
+      customerName(o.customerId),
+      o.service,
+      o.weight,
+      o.price,
+      orderTotal(o),
+      o.status,
+      o.payment,
+      o.note || ""
+    ]);
+  downloadCSV(`pesanan-laundry-${today()}.csv`, headers, rows);
+  toast("Data pesanan berhasil diekspor ke CSV.");
+}
+
+function exportCustomersCSV() {
+  if (!db.customers.length) {
+    toast("Belum ada data pelanggan untuk diekspor.");
+    return;
+  }
+  const headers = [
+    "ID Pelanggan",
+    "Nama Pelanggan",
+    "Nomor Telepon",
+    "Alamat",
+    "Jumlah Pesanan"
+  ];
+  const rows = [...db.customers]
+    .sort((a, b) => a.id - b.id)
+    .map(c => [
+      c.id,
+      c.name,
+      c.phone,
+      c.address,
+      db.orders.filter(o => o.customerId === c.id).length
+    ]);
+  downloadCSV(`pelanggan-laundry-${today()}.csv`, headers, rows);
+  toast("Data pelanggan berhasil diekspor ke CSV.");
+}
+
 /* ---------- Navigasi ---------- */
 
 function showView(page) {

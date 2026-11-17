@@ -41,9 +41,9 @@ Seluruh data disimpan di **Local Storage** browser, sehingga aplikasi berjalan t
 | Tampilan | Fitur |
 |---|---|
 | **Dashboard** | 4 kartu statistik (total pesanan, sedang diproses, selesai, pendapatan lunas), daftar 5 pesanan terbaru, tombol cepat "Buat Pesanan" |
-| **Manajemen Pesanan** | Tambah, ubah, dan hapus pesanan; pencarian berdasarkan ID, nama pelanggan, atau layanan; filter status pengerjaan; total harga otomatis |
-| **Data Pelanggan** | Tambah, ubah, dan hapus pelanggan; pencarian nama, telepon, atau alamat; jumlah riwayat pesanan per pelanggan |
-| **Laporan** | Nilai seluruh pesanan, total sudah dibayar dan belum dibayar, jumlah transaksi, grafik batang status pengerjaan, rincian transaksi, tombol cetak laporan |
+| **Manajemen Pesanan** | Tambah, ubah, dan hapus pesanan; pencarian berdasarkan ID, nama pelanggan, atau layanan; filter status pengerjaan; total harga otomatis; ekspor data ke CSV |
+| **Data Pelanggan** | Tambah, ubah, dan hapus pelanggan; pencarian nama, telepon, atau alamat; jumlah riwayat pesanan per pelanggan; ekspor data ke CSV |
+| **Laporan** | Nilai seluruh pesanan, total sudah dibayar dan belum dibayar, jumlah transaksi, grafik batang status pengerjaan, rincian transaksi, tombol ekspor CSV & cetak laporan |
 
 Fitur pendukung:
 

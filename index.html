@@ -136,7 +136,7 @@
                                     <option>Menunggu</option>
                                     <option>Diproses</option>
                                     <option>Selesai</option>
-                                </select></div>
+                                </select><button class="btn btn-light" onclick="exportOrdersCSV()" type="button">⬇ Export CSV</button></div>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -215,6 +215,7 @@
                     <section class="table-panel">
                         <div class="table-tools"><input aria-label="Cari pelanggan" class="field search"
                                 id="customer-search" placeholder="Cari nama, nomor telepon, alamat..." type="search" />
+                            <div class="tool-group"><button class="btn btn-light" onclick="exportCustomersCSV()" type="button">⬇ Export CSV</button></div>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -261,7 +262,11 @@
                         <div>
                             <h2>Laporan Laundry</h2>
                             <p>Ringkasan transaksi dan status pembayaran seluruh pesanan.</p>
-                        </div><button class="btn btn-light" onclick="window.print()">⎙ Cetak Laporan</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="btn btn-light" onclick="exportOrdersCSV()" type="button">⬇ Export CSV</button>
+                            <button class="btn btn-light" onclick="window.print()" type="button">⎙ Cetak Laporan</button>
+                        </div>
                     </div>
                     <section class="stats">
                         <article class="stat-card">
