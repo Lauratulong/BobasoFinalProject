@@ -190,9 +190,9 @@ db = {
 
 ---
 
-
-
+**Link URL GitHub Pages:**
 https://lauratulong.github.io/BobasoFinalProject/
+
 ---
 
 © 2026 BobasoLaundry · Final Project Web Design
