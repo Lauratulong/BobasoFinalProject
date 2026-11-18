@@ -2,8 +2,12 @@
 
 Aplikasi web interaktif untuk mengelola operasional pesanan laundry oleh **Admin** sekaligus portal mandiri bagi **Customer** untuk mencari pesanan, memantau progres cucian (*Laundry Tracking*), melihat tagihan, dan melakukan simulasi pembayaran online. Dibuat sebagai **Final Project Web Design: Interactive Web Application Development** menggunakan **HTML5, CSS3, dan Vanilla JavaScript** (tanpa framework).
 
-> **Anggota kelompok:** isi nama dan NIM anggota di sini
-> **Mata kuliah / dosen:** isi di sini
+> **Anggota kelompok:** Korompis, Marselino Jibryl (105012510061)
+> Mongan,Blessi Evangely (105012510044)
+> Tulong,Laura Kathleen Pathfinderly Tabita Jr (105022428001)
+> Kaeng, Petra Putra Anugrah (105032410023)
+> Yong, Herul Sabbathface (105022510015)
+> **Mata kuliah / dosen:** Web Design (sir Regi Najoan)
 
 ---
 
@@ -205,6 +209,19 @@ Fungsi `migrateData()` memastikan data lama yang hanya memiliki `customers` dan 
 | Responsive Design | Desktop, Tablet (`1000px`), dan Mobile (`700px`) |
 | HTML5, CSS3, Vanilla JS | Murni tanpa framework frontend maupun database eksternal |
 
+| Minimal 4 tampilan | Dashboard, Manajemen Pesanan, Data Pelanggan, Laporan |
+| CRUD | Pesanan dan pelanggan |
+| Search dan filter | Pencarian pesanan dan pelanggan, filter status pesanan |
+| Form validation | HTML5 dan JavaScript |
+| Local Storage | `localStorage` dengan format JSON |
+| Responsive design | Breakpoint 1000px (tablet) dan 700px (mobile) |
+| DOM manipulation dan event handling | Render dinamis dan `addEventListener` |
+| Dashboard / summary | Kartu statistik dan halaman Laporan |
+| Notifikasi / konfirmasi | Toast, `confirm()`, dan `alert()` |
+| UI/UX konsisten | Satu sistem warna dan komponen di seluruh halaman |
+| HTML5, CSS3, Vanilla JS | Tanpa framework frontend |
+
+https://lauratulong.github.io/BobasoFinalProject/
 ---
 
 © 2026 BobasoLaundry · Final Project Web Design
