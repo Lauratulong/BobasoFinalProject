@@ -87,8 +87,6 @@ Untuk keperluan pengujian dan presentasi dosen, gunakan kredensial berikut pada 
 
 ## Screenshot
 
-> Tambahkan screenshot hasil aplikasi ke folder `screenshots/`, lalu pastikan nama file sesuai dengan tautan di bawah.
-
 | Dashboard | Manajemen Pesanan |
 |---|---|
 | ![Dashboard](screenshots/dashboard.png) | ![Pesanan](screenshots/orders.png) |
@@ -192,28 +190,7 @@ db = {
 
 ---
 
-## Pemenuhan Ketentuan Project
 
-| Ketentuan | Implementasi |
-|---|---|
-| Create Account Customer | Form registrasi lengkap dengan validasi & integrasi otomatis ke `db.customers` |
-| Tanpa Panduan Demo di UI Login | Panel akun demo dihapus dari halaman Login; kredensial Admin didokumentasikan di README |
-| Desain Bertema Laundry | Welcome banner & empty state dengan ilustrasi SVG mesin cuci, keranjang, handuk, dan pakaian gantung |
-| Upload Payment Proof (Customer) | Validasi format & ukuran 2 MB, preview gambar, penyimpanan IndexedDB, status `Menunggu Verifikasi` |
-| Payment Verification (Admin) | Modal `View Payment Proof`, zoom/unduh bukti, `Verify Payment (Lunas)`, dan `Reject Payment` dengan alasan |
-| Sinkronisasi & Privasi Role | Terhubung melalui `customerId` & `orderId` pada `laundryku_data_v1`; Customer hanya melihat pesanannya sendiri |
-
-| Minimal 4 tampilan | Dashboard, Manajemen Pesanan, Data Pelanggan, Laporan |
-| CRUD | Pesanan dan pelanggan |
-| Search dan filter | Pencarian pesanan dan pelanggan, filter status pesanan |
-| Form validation | HTML5 dan JavaScript |
-| Local Storage | `localStorage` dengan format JSON |
-| Responsive design | Breakpoint 1000px (tablet) dan 700px (mobile) |
-| DOM manipulation dan event handling | Render dinamis dan `addEventListener` |
-| Dashboard / summary | Kartu statistik dan halaman Laporan |
-| Notifikasi / konfirmasi | Toast, `confirm()`, dan `alert()` |
-| UI/UX konsisten | Satu sistem warna dan komponen di seluruh halaman |
-| HTML5, CSS3, Vanilla JS | Tanpa framework frontend |
 
 https://lauratulong.github.io/BobasoFinalProject/
 ---
