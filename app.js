@@ -6,6 +6,8 @@ const IDB_STORE = "proofs";
 const MAX_PROOF_BYTES = 2 * 1024 * 1024; // 2 MB
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const ALLOWED_IMAGE_EXT = /\.(jpe?g|png|webp)$/i;
+const DEFAULT_ADMIN_USERNAME = "admin";
+const INITIAL_ADMIN_PASSWORD = "admin123";
 
 const money = n =>
   new Intl.NumberFormat("id-ID", {
@@ -38,7 +40,16 @@ const esc = s =>
 const seed = {
   customers: [],
   orders: [],
-  accounts: [],
+  accounts: [
+    {
+      id: 1,
+      customerId: null,
+      username: DEFAULT_ADMIN_USERNAME,
+      password: INITIAL_ADMIN_PASSWORD,
+      role: "admin",
+      updatedAt: ""
+    }
+  ],
   payments: []
 };
 
@@ -74,7 +85,6 @@ async function saveProofImage(proofId, dataUrl) {
     idb.close();
     return true;
   } catch (err) {
-    // Fallback ke Local Storage terkompresi jika IndexedDB diblokir browser
     try {
       const raw = localStorage.getItem(PROOF_FALLBACK_KEY);
       const map = raw ? JSON.parse(raw) : {};
@@ -193,6 +203,10 @@ function formatOrderCode(id) {
   return `#${id} (BL-${String(id).padStart(4, "0")})`;
 }
 
+function formatCustomerCode(id) {
+  return `CUS-${String(id).padStart(3, "0")}`;
+}
+
 function estimateCompletionDate(order) {
   if (!order || !order.date) return "-";
   const base = new Date(order.date + "T00:00:00");
@@ -242,7 +256,74 @@ function migrateData(parsed) {
         };
       })
     : [];
-  const accounts = Array.isArray(parsed.accounts) ? parsed.accounts : [];
+
+  const rawAccounts = Array.isArray(parsed.accounts) ? parsed.accounts : [];
+  const accounts = [];
+
+  // 1. Pastikan akun Admin selalu ada dan TIDAK menimpa password Admin yang sudah pernah diubah
+  const existingAdmin = rawAccounts.find(a => a && a.role === "admin");
+  if (existingAdmin && existingAdmin.password) {
+    accounts.push({
+      id: existingAdmin.id || 1,
+      customerId: null,
+      username: existingAdmin.username || DEFAULT_ADMIN_USERNAME,
+      password: existingAdmin.password,
+      role: "admin",
+      updatedAt: existingAdmin.updatedAt || ""
+    });
+  } else {
+    accounts.push({
+      id: 1,
+      customerId: null,
+      username: DEFAULT_ADMIN_USERNAME,
+      password: INITIAL_ADMIN_PASSWORD,
+      role: "admin",
+      updatedAt: ""
+    });
+  }
+
+  // 2. Migrasi akun Customer secara aman: pastikan customerId valid dan tidak menghubungkan nama ganda yang ambigu
+  const usedCustomerIds = new Set();
+  rawAccounts
+    .filter(a => a && a.role === "customer")
+    .forEach(acc => {
+      let validCustomerId = null;
+
+      if (
+        acc.customerId !== null &&
+        acc.customerId !== undefined &&
+        acc.customerId !== "" &&
+        customers.some(c => String(c.id) === String(acc.customerId)) &&
+        !usedCustomerIds.has(String(acc.customerId))
+      ) {
+        validCustomerId = acc.customerId;
+      } else if (acc.phone) {
+        // Cocokkan berdasarkan nomor telepon unik jika tersedia
+        const cleanAccPhone = String(acc.phone).replace(/\s|-/g, "");
+        const phoneMatches = customers.filter(
+          c =>
+            String(c.phone || "").replace(/\s|-/g, "") === cleanAccPhone &&
+            !usedCustomerIds.has(String(c.id))
+        );
+        if (phoneMatches.length === 1) {
+          validCustomerId = phoneMatches[0].id;
+        }
+      }
+
+      if (validCustomerId !== null) {
+        usedCustomerIds.add(String(validCustomerId));
+      }
+
+      accounts.push({
+        id: acc.id || accounts.length + 1,
+        customerId: validCustomerId,
+        username: acc.username,
+        password: acc.password,
+        role: "customer",
+        updatedAt: acc.updatedAt || ""
+      });
+    });
+
   const payments = Array.isArray(parsed.payments) ? parsed.payments : [];
   return { customers, orders, accounts, payments };
 }
@@ -277,23 +358,208 @@ function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
 }
 
+function saveAccountChanges() {
+  save();
+}
+
 function renderAll() {
   renderDashboard();
   renderOrders();
   renderCustomers();
   renderReports();
+  renderAdminSettingsInfo();
   renderCustomerWelcomeAndStats();
   renderCustomerQuickChips();
   renderCustomerHistory();
   if (selectedCustomerOrderId) {
-    const stillExists = db.orders.some(o => o.id === selectedCustomerOrderId);
-    if (stillExists) {
+    const myOrders = filterOrdersByCustomerId(getCurrentCustomerId());
+    const stillAccessible = myOrders.some(
+      o => String(o.id) === String(selectedCustomerOrderId)
+    );
+    if (stillAccessible) {
       renderCustomerOrderDetail(selectedCustomerOrderId);
+    } else {
+      selectedCustomerOrderId = null;
+      const orderView = document.getElementById("customer-order-view");
+      if (orderView) orderView.hidden = true;
     }
   }
 }
 
-/* ---------- Autentikasi, Create Account & Proteksi Role ---------- */
+/* ---------- Fungsi Khusus Akun, CustomerId, Filter & Validasi Akses ---------- */
+
+// 1. Mengambil akun yang sedang login langsung dari db.accounts
+function getLoggedInAccount() {
+  if (!currentSession) return null;
+
+  if (currentSession.role === "admin") {
+    return (
+      db.accounts.find(
+        a =>
+          a.role === "admin" &&
+          String(a.username).toLowerCase() ===
+            String(currentSession.username || DEFAULT_ADMIN_USERNAME).toLowerCase()
+      ) || null
+    );
+  }
+
+  if (currentSession.role === "customer") {
+    return (
+      db.accounts.find(
+        a =>
+          a.role === "customer" &&
+          (String(a.id) === String(currentSession.accountId) ||
+            String(a.username).toLowerCase() ===
+              String(currentSession.username || "").toLowerCase())
+      ) || null
+    );
+  }
+
+  return null;
+}
+
+// 2. Mengambil customerId pengguna yang sedang login dari data akun resmi
+function getCurrentCustomerId() {
+  const account = getLoggedInAccount();
+  if (!account || account.role !== "customer") return null;
+  if (
+    account.customerId === null ||
+    account.customerId === undefined ||
+    account.customerId === ""
+  ) {
+    return null;
+  }
+  const customerExists = db.customers.some(
+    c => String(c.id) === String(account.customerId)
+  );
+  return customerExists ? account.customerId : null;
+}
+
+// 3. Memfilter pesanan secara ketat berdasarkan customerId
+function filterOrdersByCustomerId(customerId, ordersList = db.orders) {
+  if (customerId === null || customerId === undefined || customerId === "") {
+    return [];
+  }
+  if (!Array.isArray(ordersList)) return [];
+  return ordersList.filter(
+    order => String(order.customerId) === String(customerId)
+  );
+}
+
+// 4. Memvalidasi akses Customer (termasuk pemeriksaan kepemilikan pesanan/customerId)
+function validateCustomerAccess(targetOrderOrCustomerId = null) {
+  const account = getLoggedInAccount();
+  if (!currentSession || currentSession.role !== "customer" || !account) {
+    toast("Akses ditolak: Silakan login sebagai Customer.");
+    return false;
+  }
+
+  const myCustomerId = getCurrentCustomerId();
+  if (myCustomerId === null) {
+    return false;
+  }
+
+  if (targetOrderOrCustomerId !== null && targetOrderOrCustomerId !== undefined) {
+    if (typeof targetOrderOrCustomerId === "object") {
+      return String(targetOrderOrCustomerId.customerId) === String(myCustomerId);
+    }
+    return String(targetOrderOrCustomerId) === String(myCustomerId);
+  }
+
+  return true;
+}
+
+// 5. Memvalidasi akses Admin
+function validateAdminAccess() {
+  const account = getLoggedInAccount();
+  if (!currentSession || currentSession.role !== "admin" || !account) {
+    toast("Akses ditolak: Fitur ini hanya untuk Admin.");
+    return false;
+  }
+  return true;
+}
+
+function requireAdmin() {
+  return validateAdminAccess();
+}
+
+// 6. Mengubah password Admin dengan validasi penuh
+function changeAdminPassword(currentPassword, newPassword, confirmPassword) {
+  if (!validateAdminAccess()) {
+    return { ok: false, message: "Akses ditolak: Hanya Admin yang dapat mengubah password Admin." };
+  }
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return { ok: false, message: "Semua kolom password wajib diisi." };
+  }
+
+  const adminAccount = db.accounts.find(a => a.role === "admin");
+  if (!adminAccount) {
+    return { ok: false, message: "Akun Admin tidak ditemukan." };
+  }
+
+  if (currentPassword !== adminAccount.password) {
+    return { ok: false, message: "Current Password tidak sesuai dengan password Admin saat ini." };
+  }
+
+  if (newPassword.length < 8) {
+    return { ok: false, message: "New Password minimal harus 8 karakter." };
+  }
+
+  if (newPassword === currentPassword) {
+    return { ok: false, message: "New Password harus berbeda dari Current Password." };
+  }
+
+  if (confirmPassword !== newPassword) {
+    return { ok: false, message: "Confirm New Password harus sama dengan New Password." };
+  }
+
+  adminAccount.password = newPassword;
+  adminAccount.updatedAt = nowDateTime();
+  saveAccountChanges();
+  renderAdminSettingsInfo();
+
+  return { ok: true, message: "Password successfully updated" };
+}
+
+function handleChangeAdminPassword(e) {
+  e.preventDefault();
+  const currentPassword = document.getElementById("admin-current-password")?.value || "";
+  const newPassword = document.getElementById("admin-new-password")?.value || "";
+  const confirmPassword = document.getElementById("admin-confirm-password")?.value || "";
+  const errEl = document.getElementById("admin-password-error");
+
+  const result = changeAdminPassword(currentPassword, newPassword, confirmPassword);
+  if (!result.ok) {
+    if (errEl) {
+      errEl.textContent = result.message;
+      errEl.hidden = false;
+    }
+    toast(result.message);
+    return;
+  }
+
+  if (errEl) errEl.hidden = true;
+  document.getElementById("admin-password-form")?.reset();
+  toast(result.message);
+}
+
+function clearAdminPasswordError() {
+  const errEl = document.getElementById("admin-password-error");
+  if (errEl) errEl.hidden = true;
+}
+
+function renderAdminSettingsInfo() {
+  const adminAccount = db.accounts.find(a => a.role === "admin");
+  if (!adminAccount) return;
+  setText("settings-admin-username", adminAccount.username || DEFAULT_ADMIN_USERNAME);
+  setText(
+    "settings-password-updated",
+    adminAccount.updatedAt ? adminAccount.updatedAt : "Default / Belum Diubah"
+  );
+}
+
+/* ---------- Sesi, Login & Create Account ---------- */
 
 function loadSession() {
   try {
@@ -316,14 +582,6 @@ function saveSession(session) {
   } else {
     localStorage.removeItem(SESSION_KEY);
   }
-}
-
-function requireAdmin() {
-  if (!currentSession || currentSession.role !== "admin") {
-    toast("Akses ditolak: Fitur ini hanya untuk Admin.");
-    return false;
-  }
-  return true;
 }
 
 function toggleAuthMode(mode) {
@@ -398,8 +656,8 @@ function handleRegister(e) {
 
   const uLower = username.toLowerCase();
   const usernameTaken =
-    uLower === "admin" ||
-    db.accounts.some(a => (a.username || "").toLowerCase() === uLower);
+    uLower === DEFAULT_ADMIN_USERNAME ||
+    db.accounts.some(a => String(a.username || "").toLowerCase() === uLower);
 
   if (usernameTaken) {
     showRegError("Username sudah terdaftar. Silakan pilih username lain.");
@@ -414,20 +672,21 @@ function handleRegister(e) {
     return;
   }
 
-  // Cek apakah data pelanggan sudah ada di db.customers (berdasarkan nomor telepon atau nama+telepon) agar tidak membuat data pelanggan ganda
+  // Hubungkan dengan data pelanggan berdasarkan nomor telepon unik agar tidak terjadi duplikasi
+  const cleanPhone = phone.replace(/\s|-/g, "");
   const existingCustomer = db.customers.find(
-    c =>
-      c.phone.replace(/\s|-/g, "") === phone.replace(/\s|-/g, "") ||
-      (c.name.toLowerCase() === fullName.toLowerCase() && c.phone === phone)
+    c => String(c.phone || "").replace(/\s|-/g, "") === cleanPhone
   );
 
   let customerId;
   if (existingCustomer) {
     const alreadyLinked = db.accounts.some(
-      a => Number(a.customerId) === Number(existingCustomer.id)
+      a =>
+        a.role === "customer" &&
+        String(a.customerId) === String(existingCustomer.id)
     );
     if (alreadyLinked) {
-      showRegError("Nomor telepon pelanggan ini sudah memiliki akun terdaftar.");
+      showRegError("Nomor telepon pelanggan ini sudah terhubung dengan akun lain.");
       return;
     }
     existingCustomer.name = fullName;
@@ -449,17 +708,17 @@ function handleRegister(e) {
     customerId,
     username,
     password,
-    role: "customer"
+    role: "customer",
+    updatedAt: nowDateTime()
   };
   db.accounts.push(newAccount);
 
-  save();
+  saveAccountChanges();
   renderAll();
 
   document.getElementById("register-form")?.reset();
   if (errEl) errEl.hidden = true;
 
-  // Arahkan kembali ke halaman Login dengan role Customer terpilih
   toggleAuthMode("login");
   selectLoginRole("customer");
   const loginUserEl = document.getElementById("login-username");
@@ -490,11 +749,19 @@ function handleLogin(e) {
     return;
   }
 
+  // Login Admin: Membaca akun Admin dari db.accounts di Local Storage
   if (role === "admin") {
-    if (username.toLowerCase() === "admin" && password === "admin123") {
+    const adminAccount = db.accounts.find(
+      a =>
+        a.role === "admin" &&
+        String(a.username || "").toLowerCase() === username.toLowerCase()
+    );
+
+    if (adminAccount && adminAccount.password === password) {
       saveSession({
         role: "admin",
-        username: "admin",
+        accountId: adminAccount.id,
+        username: adminAccount.username,
         displayName: "Admin Laundry"
       });
       if (errEl) errEl.hidden = true;
@@ -507,62 +774,40 @@ function handleLogin(e) {
     return;
   }
 
-  // Login Customer: Cek akun yang terdaftar di db.accounts terlebih dahulu
+  // Login Customer: Wajib menggunakan akun Customer terdaftar yang memiliki customerId valid
   const account = db.accounts.find(
     a =>
       a.role === "customer" &&
-      a.username.toLowerCase() === username.toLowerCase() &&
+      String(a.username || "").toLowerCase() === username.toLowerCase() &&
       a.password === password
   );
 
-  if (account) {
-    const linkedCustomer = customerById(account.customerId);
-    const displayName = linkedCustomer ? linkedCustomer.name : account.username;
-    saveSession({
-      role: "customer",
-      accountId: account.id,
-      customerId: account.customerId,
-      username: account.username,
-      displayName,
-      customerName: linkedCustomer ? linkedCustomer.name : displayName,
-      customerPhone: linkedCustomer ? linkedCustomer.phone : ""
-    });
-    if (errEl) errEl.hidden = true;
-    applySessionUI();
-    showView("customer-dashboard");
-    loadLoggedCustomerOrders();
-    toast(`Welcome back, ${displayName}!`);
+  if (!account) {
+    showError("Username atau password Customer tidak valid. Silakan buat akun melalui Create Account.");
     return;
   }
 
-  // Fallback untuk akun demo customer atau pelanggan di db.customers
-  const matchedCustomer = db.customers.find(
-    c => c.name.toLowerCase() === username.toLowerCase()
-  );
-  const isDemoCustomer =
-    username.toLowerCase() === "customer" && password === "customer123";
-  const isNamedCustomer =
-    matchedCustomer &&
-    (password === "customer123" || password === matchedCustomer.phone);
+  const linkedCustomer = customerById(account.customerId);
+  const displayName = linkedCustomer ? linkedCustomer.name : account.username;
 
-  if (isDemoCustomer || isNamedCustomer) {
-    const displayName = matchedCustomer ? matchedCustomer.name : "Customer";
-    saveSession({
-      role: "customer",
-      customerId: matchedCustomer ? matchedCustomer.id : null,
-      username,
-      displayName,
-      customerName: matchedCustomer ? matchedCustomer.name : "",
-      customerPhone: matchedCustomer ? matchedCustomer.phone : ""
-    });
-    if (errEl) errEl.hidden = true;
-    applySessionUI();
-    showView("customer-dashboard");
-    loadLoggedCustomerOrders();
-    toast(`Welcome back, ${displayName}!`);
-  } else {
-    showError("Username atau password Customer tidak valid. Silakan buat akun melalui Create Account.");
-  }
+  // Reset state pencarian pelanggan sebelumnya sebelum memuat akun baru
+  selectedCustomerOrderId = null;
+  matchedCustomerOrders = [];
+  clearSelectedProofFile();
+
+  saveSession({
+    role: "customer",
+    accountId: account.id,
+    customerId: linkedCustomer ? linkedCustomer.id : null,
+    username: account.username,
+    displayName
+  });
+
+  if (errEl) errEl.hidden = true;
+  applySessionUI();
+  showView("customer-dashboard");
+  loadLoggedCustomerOrders();
+  toast(`Welcome back, ${displayName}!`);
 }
 
 function handleLogout() {
@@ -578,6 +823,7 @@ function handleLogout() {
 
   document.getElementById("login-form")?.reset();
   document.getElementById("register-form")?.reset();
+  document.getElementById("admin-password-form")?.reset();
   toggleAuthMode("login");
   selectLoginRole("admin");
 
@@ -597,7 +843,11 @@ function applySessionUI() {
   const topEyebrow = document.getElementById("top-eyebrow");
   const sidebarNoteText = document.getElementById("sidebar-note-text");
 
-  if (!currentSession) {
+  const activeAccount = getLoggedInAccount();
+  if (!currentSession || !activeAccount) {
+    if (currentSession && !activeAccount) {
+      saveSession(null);
+    }
     if (loginScreen) loginScreen.hidden = false;
     if (appShell) appShell.hidden = true;
     return;
@@ -606,23 +856,26 @@ function applySessionUI() {
   if (loginScreen) loginScreen.hidden = true;
   if (appShell) appShell.hidden = false;
 
-  const isAdmin = currentSession.role === "admin";
+  const isAdmin = activeAccount.role === "admin";
   if (adminNav) adminNav.hidden = !isAdmin;
   if (customerNav) customerNav.hidden = isAdmin;
+
+  const myCustomer = !isAdmin ? customerById(getCurrentCustomerId()) : null;
+  const displayTitle = isAdmin
+    ? "Admin Laundry"
+    : myCustomer
+      ? myCustomer.name
+      : activeAccount.username;
 
   if (roleBadge) {
     roleBadge.textContent = isAdmin ? "ADMIN" : "CUSTOMER";
     roleBadge.classList.toggle("customer", !isAdmin);
   }
   if (userAvatar) {
-    userAvatar.textContent = (currentSession.displayName || "U")
-      .trim()
-      .charAt(0)
-      .toUpperCase();
+    userAvatar.textContent = (displayTitle || "U").trim().charAt(0).toUpperCase();
   }
   if (userName) {
-    userName.textContent =
-      currentSession.displayName || (isAdmin ? "Admin Laundry" : "Customer");
+    userName.textContent = displayTitle;
   }
   if (sidebarSubtitle) {
     sidebarSubtitle.textContent = isAdmin ? "Management System" : "Customer Portal";
@@ -635,7 +888,7 @@ function applySessionUI() {
   if (sidebarNoteText) {
     sidebarNoteText.textContent = isAdmin
       ? "Perbarui status pesanan dan verifikasi bukti pembayaran secara berkala."
-      : "Pantau status cucian Anda dan unggah bukti pembayaran agar diverifikasi Admin.";
+      : "Anda hanya melihat pesanan dan riwayat pembayaran yang terhubung dengan akun Anda.";
   }
 
   renderCustomerWelcomeAndStats();
@@ -648,7 +901,8 @@ function nextId(list) {
 }
 
 function customerById(id) {
-  return db.customers.find(c => c.id === Number(id)) || null;
+  if (id === null || id === undefined || id === "") return null;
+  return db.customers.find(c => String(c.id) === String(id)) || null;
 }
 
 function customerName(id) {
@@ -719,13 +973,14 @@ function downloadCSV(filename, headers, rows) {
 }
 
 function exportOrdersCSV() {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
   if (!db.orders.length) {
     toast("Belum ada data pesanan untuk diekspor.");
     return;
   }
   const headers = [
     "ID Pesanan",
+    "Customer ID",
     "Tanggal",
     "Pelanggan",
     "Layanan",
@@ -743,6 +998,7 @@ function exportOrdersCSV() {
     .sort((a, b) => a.id - b.id)
     .map(o => [
       o.id,
+      formatCustomerCode(o.customerId),
       o.date,
       customerName(o.customerId),
       o.service,
@@ -761,13 +1017,13 @@ function exportOrdersCSV() {
 }
 
 function exportCustomersCSV() {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
   if (!db.customers.length) {
     toast("Belum ada data pelanggan untuk diekspor.");
     return;
   }
   const headers = [
-    "ID Pelanggan",
+    "Customer ID",
     "Nama Pelanggan",
     "Nomor Telepon",
     "Alamat",
@@ -777,14 +1033,16 @@ function exportCustomersCSV() {
   const rows = [...db.customers]
     .sort((a, b) => a.id - b.id)
     .map(c => {
-      const acc = db.accounts.find(a => Number(a.customerId) === Number(c.id));
+      const acc = db.accounts.find(
+        a => a.role === "customer" && String(a.customerId) === String(c.id)
+      );
       return [
-        c.id,
+        formatCustomerCode(c.id),
         c.name,
         c.phone,
         c.address,
         acc ? acc.username : "-",
-        db.orders.filter(o => o.customerId === c.id).length
+        filterOrdersByCustomerId(c.id).length
       ];
     });
   downloadCSV(`pelanggan-laundry-${today()}.csv`, headers, rows);
@@ -793,19 +1051,20 @@ function exportCustomersCSV() {
 
 /* ---------- Navigasi ---------- */
 
-const ADMIN_VIEWS = ["dashboard", "orders", "customers", "reports"];
+const ADMIN_VIEWS = ["dashboard", "orders", "customers", "reports", "settings"];
 const CUSTOMER_VIEWS = ["customer-dashboard", "customer-history"];
 
 function showView(page) {
-  if (!currentSession) {
+  const account = getLoggedInAccount();
+  if (!currentSession || !account) {
     applySessionUI();
     return;
   }
 
-  if (currentSession.role === "customer" && ADMIN_VIEWS.includes(page)) {
+  if (account.role === "customer" && ADMIN_VIEWS.includes(page)) {
     toast("Akses ditolak: Halaman khusus Admin.");
     page = "customer-dashboard";
-  } else if (currentSession.role === "admin" && CUSTOMER_VIEWS.includes(page)) {
+  } else if (account.role === "admin" && CUSTOMER_VIEWS.includes(page)) {
     page = "dashboard";
   }
 
@@ -819,8 +1078,9 @@ function showView(page) {
     orders: "Manajemen Pesanan",
     customers: "Data Pelanggan",
     reports: "Laporan",
-    "customer-dashboard": "Customer Dashboard",
-    "customer-history": "Riwayat Pembayaran"
+    settings: "Pengaturan Admin",
+    "customer-dashboard": "Pesanan Saya",
+    "customer-history": "Riwayat Pembayaran Saya"
   };
   setText("top-title", titles[page] || "Dashboard");
   document.querySelector(".sidebar")?.classList.remove("open");
@@ -920,6 +1180,7 @@ function renderOrders() {
       const matchQuery =
         String(o.id).includes(q) ||
         formatOrderCode(o.id).toLowerCase().includes(q) ||
+        formatCustomerCode(o.customerId).toLowerCase().includes(q) ||
         customerName(o.customerId).toLowerCase().includes(q) ||
         o.service.toLowerCase().includes(q);
       const matchStatus = !status || o.status === status;
@@ -939,7 +1200,7 @@ function renderOrders() {
             <td><strong>#${o.id}</strong></td>
             <td><div class="customer-cell"><span class="mini-avatar">${esc(
               customerName(o.customerId).trim().charAt(0).toUpperCase() || "?"
-            )}</span>${esc(customerName(o.customerId))}</div></td>
+            )}</span><div><strong>${esc(customerName(o.customerId))}</strong><br><small class="muted">${esc(formatCustomerCode(o.customerId))}</small></div></div></td>
             <td>${esc(o.service)}</td>
             <td>${o.weight} kg</td>
             <td><strong>${money(orderTotal(o))}</strong></td>
@@ -975,7 +1236,7 @@ function renderOrders() {
 }
 
 function openOrderModal(id = null) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
 
   if (!db.customers.length) {
     toast("Tambahkan pelanggan terlebih dahulu.");
@@ -991,7 +1252,10 @@ function openOrderModal(id = null) {
   form.reset();
   document.getElementById("order-id").value = id || "";
   document.getElementById("order-customer").innerHTML = db.customers
-    .map(c => `<option value="${c.id}">${esc(c.name)} (${esc(c.phone)})</option>`)
+    .map(
+      c =>
+        `<option value="${c.id}">${esc(formatCustomerCode(c.id))} · ${esc(c.name)} (${esc(c.phone)})</option>`
+    )
     .join("");
 
   const o = db.orders.find(x => x.id === id);
@@ -1020,7 +1284,7 @@ function openOrderModal(id = null) {
 }
 
 function editOrder(id) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
   openOrderModal(id);
 }
 
@@ -1029,7 +1293,7 @@ function closeOrderModal() {
 }
 
 function deleteOrder(id) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
   if (confirm("Yakin ingin menghapus pesanan ini?")) {
     db.orders = db.orders.filter(o => o.id !== id);
     save();
@@ -1040,7 +1304,7 @@ function deleteOrder(id) {
 
 function submitOrder(e) {
   e.preventDefault();
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
 
   const id = Number(document.getElementById("order-id").value);
   const customerId = Number(document.getElementById("order-customer").value);
@@ -1109,7 +1373,7 @@ function submitOrder(e) {
 /* ---------- Admin: Modal View & Verify Payment Proof ---------- */
 
 async function openProofModal(orderId, openRejectBox = false) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
 
   const o = db.orders.find(x => x.id === Number(orderId));
   if (!o) return;
@@ -1118,7 +1382,7 @@ async function openProofModal(orderId, openRejectBox = false) {
   const pStat = getOrderPaymentStatus(o);
 
   setText("pm-order-id", formatOrderCode(o.id));
-  setText("pm-customer-name", customerName(o.customerId));
+  setText("pm-customer-name", `${customerName(o.customerId)} (${formatCustomerCode(o.customerId)})`);
   setText("pm-customer-phone", customerPhone(o.customerId));
   setText("pm-total", money(orderTotal(o)));
   setText("pm-method", o.paymentMethod || "-");
@@ -1221,7 +1485,6 @@ function updateOrderPaymentState(order, newStatus, note = "") {
     }
   }
 
-  // Sinkronkan juga ke riwayat db.payments
   const existingHistory = [...db.payments]
     .reverse()
     .find(p => p.orderId === order.id);
@@ -1249,7 +1512,7 @@ function updateOrderPaymentState(order, newStatus, note = "") {
 }
 
 function quickVerifyOrder(orderId) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
   const o = db.orders.find(x => x.id === Number(orderId));
   if (!o) return;
 
@@ -1264,7 +1527,7 @@ function quickVerifyOrder(orderId) {
 }
 
 function verifyOrderPayment() {
-  if (!requireAdmin() || !activeAdminProofOrderId) return;
+  if (!validateAdminAccess() || !activeAdminProofOrderId) return;
   const o = db.orders.find(x => x.id === Number(activeAdminProofOrderId));
   if (!o) return;
 
@@ -1280,7 +1543,7 @@ function verifyOrderPayment() {
 }
 
 function confirmRejectPayment() {
-  if (!requireAdmin() || !activeAdminProofOrderId) return;
+  if (!validateAdminAccess() || !activeAdminProofOrderId) return;
   const o = db.orders.find(x => x.id === Number(activeAdminProofOrderId));
   if (!o) return;
 
@@ -1299,7 +1562,7 @@ function confirmRejectPayment() {
 }
 
 function applyDirectPaymentStatus() {
-  if (!requireAdmin() || !activeAdminProofOrderId) return;
+  if (!validateAdminAccess() || !activeAdminProofOrderId) return;
   const o = db.orders.find(x => x.id === Number(activeAdminProofOrderId));
   if (!o) return;
 
@@ -1330,33 +1593,38 @@ function renderCustomers() {
 
   const q = (document.getElementById("customer-search")?.value || "").toLowerCase();
   const rows = db.customers.filter(c =>
-    (c.name + " " + c.phone + " " + c.address).toLowerCase().includes(q)
+    (formatCustomerCode(c.id) + " " + c.name + " " + c.phone + " " + c.address)
+      .toLowerCase()
+      .includes(q)
   );
 
   tbody.innerHTML = rows.length
     ? rows
         .map(c => {
-          const linkedAcc = db.accounts.find(a => Number(a.customerId) === Number(c.id));
+          const linkedAcc = db.accounts.find(
+            a => a.role === "customer" && String(a.customerId) === String(c.id)
+          );
           const accBadge = linkedAcc
             ? `<span class="status status-selesai">@${esc(linkedAcc.username)}</span>`
             : `<span class="muted">Belum registrasi</span>`;
           return `<tr>
+            <td><code>${esc(formatCustomerCode(c.id))}</code></td>
             <td><div class="customer-cell"><span class="mini-avatar">${esc(
               c.name.trim().charAt(0).toUpperCase() || "?"
             )}</span><strong>${esc(c.name)}</strong></div></td>
             <td>${esc(c.phone)}</td>
             <td>${esc(c.address)}</td>
             <td>${accBadge}</td>
-            <td>${db.orders.filter(o => o.customerId === c.id).length} pesanan</td>
+            <td>${filterOrdersByCustomerId(c.id).length} pesanan</td>
             <td><div class="actions"><button class="icon-btn" onclick="editCustomer(${c.id})" title="Edit">✎</button><button class="icon-btn" onclick="deleteCustomer(${c.id})" title="Hapus">⌫</button></div></td>
           </tr>`;
         })
         .join("")
-    : `<tr><td colspan="6" class="empty">Pelanggan tidak ditemukan.</td></tr>`;
+    : `<tr><td colspan="7" class="empty">Pelanggan tidak ditemukan.</td></tr>`;
 }
 
 function openCustomerModal(id = null) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
 
   const modal = document.getElementById("customer-modal");
   const form = document.getElementById("customer-form");
@@ -1380,7 +1648,7 @@ function openCustomerModal(id = null) {
 }
 
 function editCustomer(id) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
   openCustomerModal(id);
 }
 
@@ -1390,7 +1658,7 @@ function closeCustomerModal() {
 
 function submitCustomer(e) {
   e.preventDefault();
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
 
   const id = Number(document.getElementById("customer-id").value);
   const name = document.getElementById("customer-name").value.trim();
@@ -1422,16 +1690,18 @@ function submitCustomer(e) {
 }
 
 function deleteCustomer(id) {
-  if (!requireAdmin()) return;
+  if (!validateAdminAccess()) return;
 
-  if (db.orders.some(o => o.customerId === id)) {
+  if (db.orders.some(o => String(o.customerId) === String(id))) {
     alert("Pelanggan masih memiliki pesanan. Hapus atau pindahkan pesanan terlebih dahulu.");
     return;
   }
 
   if (confirm("Yakin ingin menghapus pelanggan ini?")) {
-    db.customers = db.customers.filter(c => c.id !== id);
-    db.accounts = db.accounts.filter(a => Number(a.customerId) !== Number(id));
+    db.customers = db.customers.filter(c => String(c.id) !== String(id));
+    db.accounts = db.accounts.filter(
+      a => a.role !== "customer" || String(a.customerId) !== String(id)
+    );
     save();
     renderAll();
     toast("Pelanggan berhasil dihapus.");
@@ -1494,26 +1764,30 @@ function renderReports() {
   }
 }
 
-/* ---------- Customer: Welcome, Stats, Search, Tracking & Upload Proof ---------- */
+/* ---------- Customer: Strict Ownership Filtering by customerId ---------- */
 
 function getAccessibleCustomerOrders() {
-  if (!currentSession || currentSession.role !== "customer") return db.orders;
-  if (currentSession.customerId) {
-    return db.orders.filter(
-      o => Number(o.customerId) === Number(currentSession.customerId)
-    );
-  }
-  return db.orders;
+  const myCustomerId = getCurrentCustomerId();
+  return filterOrdersByCustomerId(myCustomerId, db.orders);
 }
 
 function renderCustomerWelcomeAndStats() {
+  const myCustomerId = getCurrentCustomerId();
+  const myCustomer = customerById(myCustomerId);
   const cName =
-    currentSession?.customerName ||
+    myCustomer?.name ||
     currentSession?.displayName ||
     "Customer";
-  setText("cust-welcome-title", `Hello, ${cName}!`);
 
-  const myOrders = getAccessibleCustomerOrders();
+  setText("cust-welcome-title", `Hello, ${cName}!`);
+  setText(
+    "cust-account-owner-label",
+    myCustomer
+      ? `${myCustomer.name} · ${formatCustomerCode(myCustomer.id)}`
+      : cName
+  );
+
+  const myOrders = filterOrdersByCustomerId(myCustomerId);
   const total = myOrders.length;
   const process = myOrders.filter(o => isProcessingStatus(o.status)).length;
   const done = myOrders.filter(o => o.status === "Selesai").length;
@@ -1525,21 +1799,20 @@ function renderCustomerWelcomeAndStats() {
 
 function loadLoggedCustomerOrders() {
   renderCustomerWelcomeAndStats();
-  const myOrders = [...getAccessibleCustomerOrders()].sort((a, b) => b.id - a.id);
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = [...filterOrdersByCustomerId(myCustomerId)].sort(
+    (a, b) => b.id - a.id
+  );
   const feedbackEl = document.getElementById("customer-search-feedback");
   const matchesPanel = document.getElementById("customer-matches-panel");
   const orderView = document.getElementById("customer-order-view");
 
-  if (currentSession?.customerName) {
-    const qInput = document.getElementById("track-query");
-    const pInput = document.getElementById("track-phone");
-    if (qInput) qInput.value = currentSession.customerName;
-    if (pInput && currentSession.customerPhone) {
-      pInput.value = currentSession.customerPhone;
-    }
-  }
+  const qInput = document.getElementById("track-query");
+  const pSelect = document.getElementById("track-phone");
+  if (qInput) qInput.value = "";
+  if (pSelect) pSelect.value = "";
 
-  if (!myOrders.length) {
+  if (myCustomerId === null || !myOrders.length) {
     selectedCustomerOrderId = null;
     matchedCustomerOrders = [];
     if (matchesPanel) matchesPanel.hidden = true;
@@ -1551,7 +1824,7 @@ function loadLoggedCustomerOrders() {
         <div class="empty-laundry-state">
           <span class="empty-laundry-icon">🧺</span>
           <strong>Belum Ada Pesanan Laundry untuk Akun Anda</strong>
-          <small>Pesanan yang dibuat oleh Admin untuk nama/nomor telepon Anda akan otomatis tampil di sini.</small>
+          <small>Hanya pesanan yang terhubung dengan Customer ID akun Anda yang ditampilkan di halaman ini.</small>
         </div>`;
     }
     return;
@@ -1572,77 +1845,93 @@ function renderCustomerQuickChips() {
   const wrap = document.getElementById("customer-quick-chips");
   if (!wrap) return;
 
-  const accessibleOrders = [...getAccessibleCustomerOrders()].sort(
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = [...filterOrdersByCustomerId(myCustomerId)].sort(
     (a, b) => b.id - a.id
   );
-  if (!accessibleOrders.length) {
+
+  if (!myOrders.length) {
     wrap.innerHTML = `<span class="quick-chip-label">Belum ada pesanan tercatat untuk akun ini.</span>`;
     return;
   }
 
-  const sampleOrders = accessibleOrders.slice(0, 5);
+  const sampleOrders = myOrders.slice(0, 5);
   wrap.innerHTML =
-    `<span class="quick-chip-label">Pesanan Anda:</span>` +
+    `<span class="quick-chip-label">Pesanan Milik Anda:</span>` +
     sampleOrders
-      .map(o => {
-        const cName = customerName(o.customerId);
-        return `<button type="button" class="quick-chip" onclick="quickSelectOrder(${o.id})">#${o.id} · ${esc(cName)} (${esc(o.status)})</button>`;
-      })
+      .map(
+        o =>
+          `<button type="button" class="quick-chip" onclick="quickSelectOrder(${o.id})">#${o.id} · ${esc(o.service)} (${esc(o.status)})</button>`
+      )
       .join("");
 }
 
 function quickSelectOrder(orderId) {
-  const accessible = getAccessibleCustomerOrders();
-  const o = accessible.find(x => x.id === Number(orderId));
-  if (!o) {
-    toast("Anda hanya dapat mengakses pesanan milik Anda sendiri.");
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = filterOrdersByCustomerId(myCustomerId);
+  const o = myOrders.find(x => String(x.id) === String(orderId));
+  if (!o || !validateCustomerAccess(o)) {
+    toast("Akses ditolak: Anda hanya dapat melihat pesanan milik Anda sendiri.");
     return;
   }
-  const c = customerById(o.customerId);
-  const qEl = document.getElementById("track-query");
-  const pEl = document.getElementById("track-phone");
-  if (qEl) qEl.value = c ? c.name : `#${o.id}`;
-  if (pEl) pEl.value = c ? c.phone : "";
-  searchCustomerOrders(c ? c.name : `#${o.id}`, c ? c.phone : "", o.id);
+  selectMatchedOrder(o.id);
 }
 
 function handleCustomerTrackSubmit(e) {
   e.preventDefault();
   const query = (document.getElementById("track-query")?.value || "").trim();
-  const phone = (document.getElementById("track-phone")?.value || "").trim();
+  const payStatusFilter = (document.getElementById("track-phone")?.value || "").trim();
 
-  if (!query) {
-    toast("Masukkan nama pelanggan atau ID pesanan untuk mencari.");
+  if (!query && !payStatusFilter) {
+    loadLoggedCustomerOrders();
     return;
   }
-  searchCustomerOrders(query, phone);
+  searchCustomerOrders(query, payStatusFilter);
 }
 
-function searchCustomerOrders(query, phoneInput = "", preferredOrderId = null) {
+function searchCustomerOrders(query, payStatusFilter = "", preferredOrderId = null) {
   const feedbackEl = document.getElementById("customer-search-feedback");
   const matchesPanel = document.getElementById("customer-matches-panel");
   const orderView = document.getElementById("customer-order-view");
 
-  const qRaw = query.trim().toLowerCase();
+  // WAJIB: Ambil hanya pesanan yang customerId-nya cocok dengan akun yang sedang login
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = filterOrdersByCustomerId(myCustomerId, db.orders);
+  const myCustomer = customerById(myCustomerId);
+  const myOwnName = (myCustomer?.name || "").toLowerCase();
+
+  const qRaw = (query || "").trim().toLowerCase();
   const qIdClean = qRaw.replace(/^(#|bl-0*)/i, "");
-  const pClean = phoneInput.replace(/\s|-/g, "");
 
-  // Batasi pencarian hanya pada pesanan milik Customer yang sedang login
-  const pool = getAccessibleCustomerOrders();
-
-  const candidateOrders = [...pool]
+  const matched = [...myOrders]
     .sort((a, b) => b.id - a.id)
     .filter(o => {
-      const c = customerById(o.customerId);
-      const cName = (c?.name || "").toLowerCase();
+      // Pastikan kepemilikan customerId sekali lagi
+      if (String(o.customerId) !== String(myCustomerId)) return false;
+
+      const pStat = getOrderPaymentStatus(o);
+      if (
+        payStatusFilter &&
+        ["Belum Lunas", "Menunggu Verifikasi", "Lunas", "Ditolak"].includes(payStatusFilter) &&
+        pStat !== payStatusFilter
+      ) {
+        return false;
+      }
+
+      if (!qRaw) return true;
+
       const idMatch =
         String(o.id) === qIdClean ||
         formatOrderCode(o.id).toLowerCase().includes(qRaw);
-      const nameMatch = cName.includes(qRaw);
-      return idMatch || nameMatch;
+      const serviceMatch = (o.service || "").toLowerCase().includes(qRaw);
+      const statusMatch = (o.status || "").toLowerCase().includes(qRaw);
+      const dateMatch = (o.date || "").toLowerCase().includes(qRaw);
+      const ownNameMatch = myOwnName && myOwnName.includes(qRaw);
+
+      return idMatch || serviceMatch || statusMatch || dateMatch || ownNameMatch;
     });
 
-  if (!candidateOrders.length) {
+  if (!matched.length) {
     selectedCustomerOrderId = null;
     matchedCustomerOrders = [];
     if (matchesPanel) matchesPanel.hidden = true;
@@ -1654,41 +1943,20 @@ function searchCustomerOrders(query, phoneInput = "", preferredOrderId = null) {
         <div class="empty-laundry-state">
           <span class="empty-laundry-icon">🧺</span>
           <strong>Pesanan Tidak Ditemukan</strong>
-          <small>Tidak ada pesanan milik akun Anda dengan kata kunci "${esc(query)}".</small>
+          <small>Tidak ada pesanan pada akun Anda yang cocok dengan pencarian "${esc(query)}".</small>
         </div>`;
     }
-    toast("Pesanan tidak ditemukan.");
+    toast("Pesanan tidak ditemukan pada akun Anda.");
     return;
   }
 
-  const verifiedOrders = pClean
-    ? candidateOrders.filter(o => {
-        const cPhone = (customerById(o.customerId)?.phone || "").replace(/\s|-/g, "");
-        return cPhone.endsWith(pClean) || cPhone === pClean || cPhone.includes(pClean);
-      })
-    : candidateOrders;
-
-  if (!verifiedOrders.length) {
-    selectedCustomerOrderId = null;
-    matchedCustomerOrders = [];
-    if (matchesPanel) matchesPanel.hidden = true;
-    if (orderView) orderView.hidden = true;
-    if (feedbackEl) {
-      feedbackEl.hidden = false;
-      feedbackEl.className = "notice";
-      feedbackEl.innerHTML = `Pesanan ditemukan, namun <strong>Nomor Telepon Verifikasi</strong> tidak sesuai dengan data pelanggan.`;
-    }
-    toast("Verifikasi nomor telepon tidak cocok.");
-    return;
-  }
-
-  matchedCustomerOrders = verifiedOrders;
+  matchedCustomerOrders = matched;
   if (feedbackEl) feedbackEl.hidden = true;
 
   const targetId =
-    preferredOrderId && verifiedOrders.some(o => o.id === preferredOrderId)
+    preferredOrderId && matched.some(o => String(o.id) === String(preferredOrderId))
       ? preferredOrderId
-      : verifiedOrders[0].id;
+      : matched[0].id;
 
   selectedCustomerOrderId = targetId;
 
@@ -1704,9 +1972,14 @@ function renderCustomerMatchesList() {
   const matchesList = document.getElementById("customer-matches-list");
   if (!matchesList) return;
 
-  matchesList.innerHTML = matchedCustomerOrders
+  const myCustomerId = getCurrentCustomerId();
+  const safeList = matchedCustomerOrders.filter(
+    o => String(o.customerId) === String(myCustomerId)
+  );
+
+  matchesList.innerHTML = safeList
     .map(o => {
-      const active = o.id === selectedCustomerOrderId ? "active" : "";
+      const active = String(o.id) === String(selectedCustomerOrderId) ? "active" : "";
       const pStat = getOrderPaymentStatus(o);
       return `<button type="button" class="match-card ${active}" onclick="selectMatchedOrder(${o.id})">
         <div class="match-card-top">
@@ -1722,7 +1995,15 @@ function renderCustomerMatchesList() {
 }
 
 function selectMatchedOrder(orderId) {
-  selectedCustomerOrderId = Number(orderId);
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = filterOrdersByCustomerId(myCustomerId);
+  const target = myOrders.find(o => String(o.id) === String(orderId));
+  if (!target || !validateCustomerAccess(target)) {
+    toast("Akses ditolak: Pesanan bukan milik akun Anda.");
+    return;
+  }
+
+  selectedCustomerOrderId = target.id;
   clearSelectedProofFile();
   renderCustomerMatchesList();
   renderCustomerOrderDetail(selectedCustomerOrderId);
@@ -1730,9 +2011,14 @@ function selectMatchedOrder(orderId) {
 
 async function renderCustomerOrderDetail(orderId) {
   const orderView = document.getElementById("customer-order-view");
-  const accessible = getAccessibleCustomerOrders();
-  const o = accessible.find(x => x.id === Number(orderId));
-  if (!o || !orderView) return;
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = filterOrdersByCustomerId(myCustomerId);
+  const o = myOrders.find(x => String(x.id) === String(orderId));
+
+  if (!o || !orderView || !validateCustomerAccess(o)) {
+    if (orderView) orderView.hidden = true;
+    return;
+  }
 
   orderView.hidden = false;
   const cName = customerName(o.customerId);
@@ -1808,7 +2094,6 @@ async function renderCustomerOrderDetail(orderId) {
     setText("pay-proof-date-text", o.paymentProofDate || "-");
   }
 
-  // Status Ditolak -> tampilkan alasan penolakan & izinkan upload ulang
   const rejectedBox = document.getElementById("payment-rejected-alert");
   if (rejectedBox) {
     if (pStat === "Ditolak") {
@@ -1822,7 +2107,6 @@ async function renderCustomerOrderDetail(orderId) {
     }
   }
 
-  // Status Menunggu Verifikasi -> tampilkan info bukti yang sudah terkirim
   const pendingBox = document.getElementById("payment-pending-alert");
   const submittedWrap = document.getElementById("cust-submitted-proof-wrap");
   const submittedImg = document.getElementById("cust-submitted-proof-img");
@@ -1958,10 +2242,11 @@ async function submitPaymentProof() {
     return;
   }
 
-  const accessible = getAccessibleCustomerOrders();
-  const order = accessible.find(o => o.id === selectedCustomerOrderId);
-  if (!order) {
-    toast("Pesanan tidak ditemukan atau bukan milik akun Anda.");
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = filterOrdersByCustomerId(myCustomerId);
+  const order = myOrders.find(o => String(o.id) === String(selectedCustomerOrderId));
+  if (!order || !validateCustomerAccess(order)) {
+    toast("Akses ditolak: Pesanan tidak ditemukan atau bukan milik akun Anda.");
     return;
   }
 
@@ -1983,7 +2268,6 @@ async function submitPaymentProof() {
   const saved = await saveProofImage(proofId, pendingProofDataUrl);
   if (!saved) return;
 
-  // Perbarui data pembayaran pesanan menjadi Menunggu Verifikasi
   order.paymentMethod = method;
   order.paymentProofId = proofId;
   order.paymentProofName = pendingProofFile.name;
@@ -1993,7 +2277,6 @@ async function submitPaymentProof() {
   order.paymentNote = "";
   order.verifiedAt = "";
 
-  // Catat riwayat pengiriman bukti pembayaran
   const paymentId = nextId(db.payments);
   const refCode = `PRF-${today().replace(/-/g, "")}-${String(paymentId).padStart(3, "0")}`;
   order.paymentRef = refCode;
@@ -2024,21 +2307,20 @@ async function submitPaymentProof() {
 }
 
 function openReceiptModal(orderId = selectedCustomerOrderId) {
-  const o = db.orders.find(x => x.id === Number(orderId));
+  const o = db.orders.find(x => String(x.id) === String(orderId));
   if (!o) return;
 
-  if (
-    currentSession?.role === "customer" &&
-    currentSession.customerId &&
-    Number(o.customerId) !== Number(currentSession.customerId)
-  ) {
-    toast("Anda hanya dapat melihat bukti pembayaran pesanan milik Anda.");
+  const account = getLoggedInAccount();
+  if (!account) return;
+
+  if (account.role === "customer" && !validateCustomerAccess(o)) {
+    toast("Akses ditolak: Anda hanya dapat melihat bukti pembayaran pesanan milik Anda.");
     return;
   }
 
   const paymentRecord = [...db.payments]
     .reverse()
-    .find(p => p.orderId === o.id);
+    .find(p => String(p.orderId) === String(o.id));
 
   const refCode =
     paymentRecord?.refCode ||
@@ -2068,7 +2350,8 @@ function renderCustomerHistory() {
   if (!tbody) return;
 
   const q = (document.getElementById("cust-history-search")?.value || "").toLowerCase();
-  const myOrders = getAccessibleCustomerOrders().filter(
+  const myCustomerId = getCurrentCustomerId();
+  const myOrders = filterOrdersByCustomerId(myCustomerId).filter(
     o =>
       o.paymentProofDate ||
       getOrderPaymentStatus(o) !== "Belum Lunas"
@@ -2113,7 +2396,7 @@ function renderCustomerHistory() {
           </tr>`;
         })
         .join("")
-    : `<tr><td colspan="8" class="empty">Belum ada riwayat pengiriman bukti pembayaran.</td></tr>`;
+    : `<tr><td colspan="8" class="empty">Belum ada riwayat pengiriman bukti pembayaran pada akun Anda.</td></tr>`;
 }
 
 /* ---------- Init ---------- */
@@ -2124,6 +2407,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("login-form")?.addEventListener("submit", handleLogin);
   document.getElementById("register-form")?.addEventListener("submit", handleRegister);
+  document
+    .getElementById("admin-password-form")
+    ?.addEventListener("submit", handleChangeAdminPassword);
   document.getElementById("order-search")?.addEventListener("input", renderOrders);
   document.getElementById("status-filter")?.addEventListener("change", renderOrders);
   document.getElementById("payment-filter")?.addEventListener("change", renderOrders);
@@ -2133,6 +2419,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("customer-track-form")
     ?.addEventListener("submit", handleCustomerTrackSubmit);
+  document
+    .getElementById("track-phone")
+    ?.addEventListener("change", handleCustomerTrackSubmit);
   document
     .getElementById("cust-history-search")
     ?.addEventListener("input", renderCustomerHistory);
@@ -2173,11 +2462,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   applySessionUI();
-  if (currentSession) {
+  const activeAccount = getLoggedInAccount();
+  if (currentSession && activeAccount) {
     showView(
-      currentSession.role === "customer" ? "customer-dashboard" : "dashboard"
+      activeAccount.role === "customer" ? "customer-dashboard" : "dashboard"
     );
-    if (currentSession.role === "customer") {
+    if (activeAccount.role === "customer") {
       loadLoggedCustomerOrders();
     }
   }

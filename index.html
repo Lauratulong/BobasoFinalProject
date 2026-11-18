@@ -66,8 +66,8 @@
                     <div class="login-feature-item">
                         <span class="login-feature-icon">◷</span>
                         <div>
-                            <strong>Pelacakan &amp; Pembayaran Pelanggan</strong>
-                            <small>Pantau progres cucian 6 tahap dan unggah bukti pembayaran dengan mudah.</small>
+                            <strong>Privasi &amp; Pelacakan Pesanan Pelanggan</strong>
+                            <small>Setiap pelanggan hanya melihat pesanan, status cucian, dan tagihan miliknya sendiri.</small>
                         </div>
                     </div>
                 </div>
@@ -185,10 +185,11 @@
                     <a href="#" data-page="orders"><span class="nav-icon">▤</span>Manajemen Pesanan</a>
                     <a href="#" data-page="customers"><span class="nav-icon">♙</span>Data Pelanggan</a>
                     <a href="#" data-page="reports"><span class="nav-icon">▥</span>Laporan</a>
+                    <a href="#" data-page="settings"><span class="nav-icon">⚙</span>Pengaturan Admin</a>
                 </nav>
                 <!-- Menu Customer -->
                 <nav class="nav-list" id="customer-nav" hidden>
-                    <a href="#" data-page="customer-dashboard" class="active"><span class="nav-icon">⌕</span>Dashboard &amp; Pesanan</a>
+                    <a href="#" data-page="customer-dashboard" class="active"><span class="nav-icon">⌕</span>Pesanan Saya</a>
                     <a href="#" data-page="customer-history"><span class="nav-icon">▤</span>Riwayat Pembayaran</a>
                 </nav>
             </div>
@@ -331,7 +332,7 @@
                                 <div class="care-badge"><span>🫧</span>Deterjen Ramah</div>
                                 <div class="care-badge"><span>👕</span>Lipat &amp; Gantung Rapi</div>
                             </div>
-                            <div class="notice">Data pesanan, akun pelanggan, dan bukti pembayaran terhubung otomatis pada <strong>Local Storage</strong> &amp; <strong>IndexedDB</strong> browser ini.</div>
+                            <div class="notice">Data pesanan, akun pelanggan, dan bukti pembayaran terhubung otomatis berdasarkan <code>customerId</code> pada <strong>Local Storage</strong> &amp; <strong>IndexedDB</strong> browser ini.</div>
                         </aside>
                     </section>
                 </section>
@@ -469,7 +470,7 @@
                     <div class="page-intro">
                         <div>
                             <h2>Data Pelanggan</h2>
-                            <p>Kelola informasi pelanggan laundry dan akun yang terhubung.</p>
+                            <p>Kelola informasi pelanggan laundry dan akun yang terhubung berdasarkan Customer ID.</p>
                         </div>
                         <button class="btn btn-primary" onclick="openCustomerModal()">＋ Tambah Pelanggan</button>
                     </div>
@@ -485,10 +486,11 @@
                             <table>
                                 <thead>
                                     <tr>
+                                        <th>Customer ID</th>
                                         <th>Nama Pelanggan</th>
                                         <th>Nomor Telepon</th>
                                         <th>Alamat</th>
-                                        <th>Akun</th>
+                                        <th>Akun Terhubung</th>
                                         <th>Riwayat</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -603,6 +605,67 @@
                     </section>
                 </section>
 
+                <!-- ==================== ADMIN: PENGATURAN & CHANGE PASSWORD ==================== -->
+                <section class="view" data-view="settings" hidden>
+                    <div class="page-intro">
+                        <div>
+                            <h2>Pengaturan Akun Admin</h2>
+                            <p>Kelola keamanan akun dan perbarui password Admin.</p>
+                        </div>
+                    </div>
+
+                    <section class="two-col">
+                        <article class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <h3>Change Admin Password</h3>
+                                    <p>Perbarui password login Admin. Password baru akan disimpan pada Local Storage dan langsung berlaku untuk login berikutnya.</p>
+                                </div>
+                            </div>
+
+                            <form id="admin-password-form" novalidate>
+                                <div class="form-group">
+                                    <label for="admin-current-password">Current Password *</label>
+                                    <input class="field" id="admin-current-password" type="password" placeholder="Masukkan password Admin saat ini" required autocomplete="current-password">
+                                </div>
+                                <div class="form-group" style="margin-top:13px">
+                                    <label for="admin-new-password">New Password *</label>
+                                    <input class="field" id="admin-new-password" type="password" placeholder="Minimal 8 karakter (berbeda dari password lama)" minlength="8" required autocomplete="new-password">
+                                </div>
+                                <div class="form-group" style="margin-top:13px">
+                                    <label for="admin-confirm-password">Confirm New Password *</label>
+                                    <input class="field" id="admin-confirm-password" type="password" placeholder="Ulangi password baru" minlength="8" required autocomplete="new-password">
+                                </div>
+
+                                <div id="admin-password-error" class="login-error" hidden></div>
+
+                                <div class="form-actions">
+                                    <button type="reset" class="btn btn-light" onclick="clearAdminPasswordError()">Reset</button>
+                                    <button type="submit" class="btn btn-primary">Update Password</button>
+                                </div>
+                            </form>
+                        </article>
+
+                        <aside class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <h3>Ketentuan Keamanan Password</h3>
+                                    <p>Aturan validasi pembaruan password Admin.</p>
+                                </div>
+                            </div>
+                            <div class="summary-list">
+                                <div class="summary-row"><span>Username Admin</span><strong id="settings-admin-username">admin</strong></div>
+                                <div class="summary-row"><span>Panjang Minimal</span><strong>8 Karakter</strong></div>
+                                <div class="summary-row"><span>Aturan Pembaruan</span><strong>Wajib berbeda dari password lama</strong></div>
+                                <div class="summary-row"><span>Terakhir Diperbarui</span><strong id="settings-password-updated">Default / Belum Diubah</strong></div>
+                            </div>
+                            <div class="notice" style="margin-top:16px">
+                                Perubahan password hanya berlaku untuk akun <strong>Admin</strong> dan tidak memengaruhi akun maupun password milik <strong>Customer</strong>.
+                            </div>
+                        </aside>
+                    </section>
+                </section>
+
                 <!-- ==================== CUSTOMER: DASHBOARD & TRACKING ==================== -->
                 <section class="view" data-view="customer-dashboard" hidden>
                     <!-- Laundry Themed Customer Welcome Banner -->
@@ -611,7 +674,7 @@
                             <span class="banner-eyebrow">WELCOME TO BOBASOLAUNDRY · YOUR LAUNDRY, OUR PRIORITY.</span>
                             <h2 id="cust-welcome-title">Hello, Customer!</h2>
                             <p class="banner-tagline">Welcome back to BobasoLaundry.</p>
-                            <p class="banner-desc">Pantau status pengerjaan cucian Anda secara real-time dan unggah bukti pembayaran dengan mudah.</p>
+                            <p class="banner-desc">Pantau status pengerjaan cucian milik akun Anda secara real-time dan unggah bukti pembayaran dengan mudah.</p>
                         </div>
                         <div class="welcome-banner-art" aria-hidden="true">
                             <!-- Ilustrasi SVG Keranjang Pakaian & Tumpukan Handuk Bersih -->
@@ -641,7 +704,7 @@
                         <article class="stat-card">
                             <div class="stat-top"><span>Total Pesanan Saya</span><span class="stat-icon">🧺</span></div>
                             <div class="stat-value" id="cust-stat-total">0</div>
-                            <div class="stat-foot">Seluruh pesanan terdaftar</div>
+                            <div class="stat-foot">Terhubung dengan akun Anda</div>
                         </article>
                         <article class="stat-card">
                             <div class="stat-top"><span>Sedang Diproses</span><span class="stat-icon">🫧</span></div>
@@ -655,26 +718,32 @@
                         </article>
                     </section>
 
-                    <!-- 1. Search Order Card -->
+                    <!-- 1. Search Order Card (Scoped strictly to logged-in Customer's customerId) -->
                     <section class="panel customer-search-panel">
                         <div class="panel-head">
                             <div>
-                                <h3>1. Cari &amp; Pilih Pesanan Laundry</h3>
-                                <p>Cari pesanan milik Anda berdasarkan ID/kode pesanan atau nama pelanggan.</p>
+                                <h3>1. Cari Pesanan Saya</h3>
+                                <p>Pencarian dibatasi khusus untuk pesanan milik akun Anda (<strong id="cust-account-owner-label">-</strong>).</p>
                             </div>
                         </div>
                         <form id="customer-track-form" class="customer-search-grid">
                             <div class="form-group">
-                                <label for="track-query">Nama Pelanggan / ID Pesanan *</label>
-                                <input class="field" id="track-query" type="text" placeholder="Contoh: nama Anda atau #1" required>
+                                <label for="track-query">Cari Kode Pesanan / Layanan / Status *</label>
+                                <input class="field" id="track-query" type="text" placeholder="Contoh: #1, BL-0001, Cuci &amp; Setrika, atau nama Anda" required>
                             </div>
                             <div class="form-group">
-                                <label for="track-phone">Nomor Telepon (Verifikasi)</label>
-                                <input class="field" id="track-phone" type="tel" placeholder="Contoh: 0812xxxxxxxx">
+                                <label for="track-phone">Filter Status Pembayaran</label>
+                                <select class="field" id="track-phone">
+                                    <option value="">Semua Status Pembayaran</option>
+                                    <option value="Belum Lunas">Belum Lunas</option>
+                                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                                    <option value="Lunas">Lunas</option>
+                                    <option value="Ditolak">Ditolak</option>
+                                </select>
                             </div>
                             <div class="form-group customer-search-btn-wrap">
-                                <button type="submit" class="btn btn-primary">⌕ Cari Pesanan</button>
-                                <button type="button" class="btn btn-light" onclick="loadLoggedCustomerOrders()">Tampilkan Pesanan Saya</button>
+                                <button type="submit" class="btn btn-primary">⌕ Cari Pesanan Saya</button>
+                                <button type="button" class="btn btn-light" onclick="loadLoggedCustomerOrders()">Tampilkan Semua Pesanan Saya</button>
                             </div>
                         </form>
                         <div id="customer-quick-chips" class="quick-chips"></div>
@@ -687,8 +756,8 @@
                     <section id="customer-matches-panel" class="panel" hidden>
                         <div class="panel-head">
                             <div>
-                                <h3>Daftar Pesanan Anda</h3>
-                                <p>Klik salah satu kartu pesanan di bawah ini untuk melihat tracking, rincian tagihan, dan unggah bukti pembayaran.</p>
+                                <h3>Daftar Pesanan Milik Anda</h3>
+                                <p>Klik salah satu pesanan Anda di bawah ini untuk melihat tracking, rincian tagihan, dan unggah bukti pembayaran.</p>
                             </div>
                         </div>
                         <div id="customer-matches-list" class="matches-grid"></div>
@@ -719,7 +788,7 @@
                                 <div class="panel-head">
                                     <div>
                                         <h3>3. Rincian Pesanan</h3>
-                                        <p>Informasi lengkap transaksi laundry Anda.</p>
+                                        <p>Informasi lengkap transaksi laundry milik Anda.</p>
                                     </div>
                                     <strong id="cust-detail-code" class="order-code-tag">#1</strong>
                                 </div>
@@ -824,7 +893,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Form Pilih Metode & Upload Payment Proof (Tampil jika Belum Lunas / Ditolak / ingin ganti bukti saat Menunggu Verifikasi) -->
+                                <!-- Form Pilih Metode & Upload Payment Proof -->
                                 <div id="payment-action-area">
                                     <div class="form-group" style="margin-top:14px">
                                         <label>Pilih Metode Pembayaran *</label>
@@ -922,10 +991,10 @@
                 <section class="view" data-view="customer-history" hidden>
                     <div class="page-intro">
                         <div>
-                            <h2>Riwayat Pembayaran &amp; Pengiriman Bukti</h2>
-                            <p>Daftar pengiriman bukti pembayaran dan status verifikasi dari Admin.</p>
+                            <h2>Riwayat Pembayaran Saya</h2>
+                            <p>Daftar pengiriman bukti pembayaran dan status verifikasi khusus untuk pesanan akun Anda.</p>
                         </div>
-                        <button class="btn btn-light" onclick="showView('customer-dashboard')" type="button">← Kembali ke Dashboard</button>
+                        <button class="btn btn-light" onclick="showView('customer-dashboard')" type="button">← Kembali ke Pesanan Saya</button>
                     </div>
                     <section class="table-panel">
                         <div class="table-tools">

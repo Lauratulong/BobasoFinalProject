@@ -69,7 +69,8 @@ Seluruh metadata disimpan di **Local Storage** browser (`laundryku_data_v1`) den
 | **Manajemen Pesanan** | CRUD pesanan, filter status cucian & filter status pembayaran, tombol **View Payment Proof**, tombol aksi cepat **✓ Verify** dan **✕ Reject**, serta **Export CSV** |
 | **Modal View Payment Proof** | Menampilkan detail pesanan, metode pembayaran, waktu unggah, foto bukti pembayaran (dengan fitur **Perbesar/Zoom** & **Unduh Bukti**), atau pesan *"No Payment Proof Uploaded"* jika belum ada bukti |
 | **Verify & Reject Payment** | Admin dapat mengubah status pembayaran secara langsung, menerima bukti (**Verify Payment** → `Lunas`), atau menolak bukti (**Reject Payment** → `Ditolak` dengan input alasan penolakan wajib) |
-| **Data Pelanggan & Laporan** | CRUD pelanggan (menampilkan username akun yang terhubung), laporan pendapatan Lunas vs Belum Lunas, grafik batang 6 tahap status, Export CSV, dan Cetak Laporan |
+| **Data Pelanggan & Laporan** | CRUD pelanggan (menampilkan Customer ID & username akun yang terhubung), laporan pendapatan Lunas vs Belum Lunas, grafik batang 6 tahap status, Export CSV, dan Cetak Laporan |
+| **Pengaturan Admin (Change Password)** | Mengubah password Admin (`Current Password`, `New Password` min. 8 karakter & berbeda dari password lama, `Confirm New Password`) yang tersimpan permanen di Local Storage (`laundryku_data_v1`) |
 
 ---
 
@@ -79,7 +80,7 @@ Untuk keperluan pengujian dan presentasi dosen, gunakan kredensial berikut pada 
 
 | Role | Username | Password | Keterangan |
 |---|---|---|---|
-| **Admin** | `admin` | `admin123` | Akses penuh ke Dashboard Admin, CRUD Pesanan & Pelanggan, Verifikasi Pembayaran, Laporan, dan Export CSV |
+| **Admin** | `admin` | `admin123` *(awal, dapat diganti di menu **Pengaturan Admin**)* | Akses penuh ke Dashboard Admin, CRUD Pesanan & Pelanggan, Verifikasi Pembayaran, Laporan, Export CSV, dan Change Admin Password |
 | **Customer** | *(Buat melalui **Create Account**)* | *(Sesuai registrasi, min. 8 karakter)* | Otomatis terhubung ke `db.customers` dan langsung dapat digunakan login |
 
 ---
@@ -184,6 +185,8 @@ db = {
 ## Aturan Validasi & Proteksi Role
 
 - **Registrasi Customer**: Semua kolom wajib diisi, nama $\ge 2$ karakter, telepon sesuai `/^(\+62|0)[0-9]{8,13}$/`, alamat $\ge 3$ karakter, username $\ge 4$ karakter tanpa spasi & belum terdaftar, password $\ge 8$ karakter, dan confirm password harus cocok.
+- **Privasi Pesanan Pelanggan (`customerId`)**: Setiap pencarian, daftar pesanan, detail tagihan, bukti pembayaran, dan riwayat pembayaran Customer difilter secara ketat menggunakan `filterOrdersByCustomerId(getCurrentCustomerId())` (`String(order.customerId) === String(currentUser.customerId)`). Pelanggan tidak dapat melihat nama maupun pesanan milik pelanggan lain.
+- **Change Admin Password**: Validasi `Current Password` sesuai password Admin saat ini, `New Password` $\ge 8$ karakter dan wajib berbeda dari password lama, serta `Confirm New Password` harus sama. Password baru disimpan di `db.accounts` pada Local Storage dan tetap berlaku setelah browser di-refresh.
 - **Upload Bukti Pembayaran**: Wajib memilih file, format harus `JPG`, `JPEG`, `PNG`, atau `WEBP`, ukuran maksimal `2 MB`. Customer hanya dapat mengubah status menjadi `Menunggu Verifikasi` (tidak bisa langsung menjadi `Lunas`).
 - **Verifikasi Admin**: Hanya Admin yang dapat mengubah status menjadi `Lunas` atau `Ditolak`. Penolakan wajib disertai alasan penolakan.
 
