@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <!-- ==================== HALAMAN LOGIN ==================== -->
+    <!-- ==================== HALAMAN LOGIN & REGISTRASI ==================== -->
     <div id="login-screen" class="login-screen">
         <div class="login-container">
             <div class="login-brand-panel">
@@ -21,30 +21,53 @@
                         <small>Laundry Management &amp; Tracking System</small>
                     </div>
                 </div>
+
                 <div class="login-hero-text">
-                    <h1>Kelola &amp; Pantau Laundry Lebih Mudah dalam Satu Sistem.</h1>
-                    <p>Platform terintegrasi untuk Admin operasional laundry dan Pelanggan untuk melacak status cucian serta simulasi pembayaran secara langsung.</p>
+                    <h1>Welcome to BobasoLaundry — Your Laundry, Our Priority.</h1>
+                    <p>Platform terintegrasi untuk pengelolaan operasional laundry, pelacakan status cucian secara real-time, serta unggah dan verifikasi bukti pembayaran.</p>
                 </div>
+
+                <!-- Ilustrasi SVG Bertema Laundry pada Panel Branding -->
+                <div class="login-laundry-illustration" aria-hidden="true">
+                    <svg viewBox="0 0 360 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Gelembung Sabun -->
+                        <circle cx="42" cy="34" r="10" fill="rgba(140,196,255,0.18)" stroke="#8cc4ff" stroke-width="1.5" />
+                        <circle cx="64" cy="20" r="5" fill="rgba(140,196,255,0.22)" />
+                        <circle cx="318" cy="28" r="12" fill="rgba(140,196,255,0.16)" stroke="#8cc4ff" stroke-width="1.5" />
+                        <circle cx="295" cy="18" r="6" fill="rgba(140,196,255,0.25)" />
+                        <!-- Mesin Cuci -->
+                        <rect x="78" y="18" width="96" height="116" rx="12" fill="#1d3d66" stroke="#8cc4ff" stroke-width="2" />
+                        <line x1="78" y1="42" x2="174" y2="42" stroke="#8cc4ff" stroke-width="1.5" />
+                        <circle cx="94" cy="30" r="4" fill="#8cc4ff" />
+                        <circle cx="107" cy="30" r="4" fill="#5ce0a8" />
+                        <rect x="138" y="26" width="24" height="8" rx="4" fill="rgba(255,255,255,0.2)" />
+                        <circle cx="126" cy="86" r="31" fill="#102540" stroke="#8cc4ff" stroke-width="2.5" />
+                        <path d="M101 88 C110 78, 124 96, 136 86 C144 79, 150 86, 152 88 A26 26 0 0 1 101 88 Z" fill="rgba(40,120,208,0.55)" />
+                        <!-- Keranjang & Tumpukan Handuk Bersih -->
+                        <rect x="196" y="76" width="90" height="58" rx="10" fill="#234b7a" stroke="#8cc4ff" stroke-width="2" />
+                        <line x1="212" y1="90" x2="212" y2="122" stroke="#8cc4ff" stroke-width="1.5" stroke-linecap="round" />
+                        <line x1="241" y1="90" x2="241" y2="122" stroke="#8cc4ff" stroke-width="1.5" stroke-linecap="round" />
+                        <line x1="270" y1="90" x2="270" y2="122" stroke="#8cc4ff" stroke-width="1.5" stroke-linecap="round" />
+                        <!-- Tumpukan Handuk -->
+                        <rect x="204" y="62" width="74" height="14" rx="7" fill="#eaf5ff" stroke="#2878d0" stroke-width="1.5" />
+                        <rect x="208" y="49" width="66" height="13" rx="6.5" fill="#bfe6d0" stroke="#16845b" stroke-width="1.5" />
+                        <rect x="214" y="37" width="54" height="12" rx="6" fill="#ffffff" stroke="#8cc4ff" stroke-width="1.5" />
+                    </svg>
+                </div>
+
                 <div class="login-features">
                     <div class="login-feature-item">
                         <span class="login-feature-icon">▦</span>
                         <div>
-                            <strong>Panel Admin Lengkap</strong>
-                            <small>Kelola pesanan, data pelanggan, laporan pendapatan, dan ekspor CSV.</small>
+                            <strong>Manajemen &amp; Verifikasi Terpadu</strong>
+                            <small>Kelola pesanan, data pelanggan, dan verifikasi bukti pembayaran.</small>
                         </div>
                     </div>
                     <div class="login-feature-item">
                         <span class="login-feature-icon">◷</span>
                         <div>
-                            <strong>Pelacakan Status Real-Time</strong>
-                            <small>Pantau perkembangan cucian dari diterima hingga siap diambil.</small>
-                        </div>
-                    </div>
-                    <div class="login-feature-item">
-                        <span class="login-feature-icon">✓</span>
-                        <div>
-                            <strong>Simulasi Pembayaran (DEMO)</strong>
-                            <small>Cek tagihan, bayar dengan simulasi QRIS/Transfer, dan cetak bukti.</small>
+                            <strong>Pelacakan &amp; Pembayaran Pelanggan</strong>
+                            <small>Pantau progres cucian 6 tahap dan unggah bukti pembayaran dengan mudah.</small>
                         </div>
                     </div>
                 </div>
@@ -52,11 +75,12 @@
             </div>
 
             <div class="login-form-panel">
-                <div class="login-card">
+                <!-- CARD LOGIN -->
+                <div class="login-card" id="login-card-box">
                     <div class="login-head">
                         <span class="badge-pill">SISTEM AKSES PENGGUNA</span>
                         <h2>Masuk ke Akun Anda</h2>
-                        <p>Pilih peran akses dan masukkan kredensial untuk melanjutkan.</p>
+                        <p>Pilih peran akses dan masukkan username serta password Anda.</p>
                     </div>
 
                     <div class="role-tabs" role="tablist" aria-label="Pilih Peran Login">
@@ -71,7 +95,7 @@
                             <span class="role-tab-icon">👤</span>
                             <div>
                                 <strong>Customer</strong>
-                                <small>Cek &amp; Bayar Laundry</small>
+                                <small>Lacak &amp; Bayar Laundry</small>
                             </div>
                         </button>
                     </div>
@@ -90,22 +114,54 @@
                         <button type="submit" class="btn btn-primary btn-block" style="margin-top:18px">Masuk Sekarang →</button>
                     </form>
 
-                    <div class="demo-credentials">
-                        <div class="demo-head">
-                            <strong>Akun Demo (Klik untuk isi otomatis)</strong>
-                            <span class="demo-tag">DEMO KULIAH</span>
+                    <div class="auth-switch">
+                        <span>Don't have an account?</span>
+                        <button type="button" class="link-btn" onclick="toggleAuthMode('register')">Create Account</button>
+                    </div>
+                </div>
+
+                <!-- CARD REGISTRASI CUSTOMER (CREATE ACCOUNT) -->
+                <div class="login-card" id="register-card-box" hidden>
+                    <div class="login-head">
+                        <span class="badge-pill badge-customer">REGISTRASI PELANGGAN</span>
+                        <h2>Create Customer Account</h2>
+                        <p>Daftarkan akun pelanggan baru untuk memantau pesanan dan mengunggah bukti pembayaran.</p>
+                    </div>
+
+                    <form id="register-form" novalidate>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label for="reg-name">Full Name *</label>
+                                <input class="field" id="reg-name" type="text" placeholder="Nama lengkap (min. 2 karakter)" minlength="2" maxlength="60" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-phone">Phone Number *</label>
+                                <input class="field" id="reg-phone" type="tel" placeholder="08xxxxxxxxxx" minlength="8" maxlength="15" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-username">Username *</label>
+                                <input class="field" id="reg-username" type="text" placeholder="Min. 4 karakter" minlength="4" maxlength="30" required autocomplete="username">
+                            </div>
+                            <div class="form-group full">
+                                <label for="reg-address">Address *</label>
+                                <input class="field" id="reg-address" type="text" placeholder="Alamat lengkap (min. 3 karakter)" minlength="3" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-password">Password *</label>
+                                <input class="field" id="reg-password" type="password" placeholder="Min. 8 karakter" minlength="8" required autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-confirm-password">Confirm Password *</label>
+                                <input class="field" id="reg-confirm-password" type="password" placeholder="Ulangi password" minlength="8" required autocomplete="new-password">
+                            </div>
                         </div>
-                        <div class="demo-grid">
-                            <button type="button" class="demo-box" onclick="fillDemoAccount('admin')">
-                                <span class="demo-role">Admin Demo</span>
-                                <code>admin / admin123</code>
-                            </button>
-                            <button type="button" class="demo-box" onclick="fillDemoAccount('customer')">
-                                <span class="demo-role">Customer Demo</span>
-                                <code>customer / customer123</code>
-                            </button>
-                        </div>
-                        <small class="demo-note">Autentikasi berbasis Local Storage untuk demonstrasi Final Project Web Design.</small>
+                        <div id="register-error" class="login-error" hidden></div>
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px">Create Account →</button>
+                    </form>
+
+                    <div class="auth-switch">
+                        <span>Already have an account?</span>
+                        <button type="button" class="link-btn" onclick="toggleAuthMode('login')">Back to Sign In</button>
                     </div>
                 </div>
             </div>
@@ -132,13 +188,13 @@
                 </nav>
                 <!-- Menu Customer -->
                 <nav class="nav-list" id="customer-nav" hidden>
-                    <a href="#" data-page="customer-dashboard" class="active"><span class="nav-icon">⌕</span>Lacak &amp; Bayar Pesanan</a>
+                    <a href="#" data-page="customer-dashboard" class="active"><span class="nav-icon">⌕</span>Dashboard &amp; Pesanan</a>
                     <a href="#" data-page="customer-history"><span class="nav-icon">▤</span>Riwayat Pembayaran</a>
                 </nav>
             </div>
             <div class="sidebar-note" id="sidebar-note-box">
                 <strong>Tips BobasoLaundry</strong><br>
-                <span id="sidebar-note-text">Perbarui status pesanan secara berkala agar pelanggan mendapatkan informasi yang tepat.</span>
+                <span id="sidebar-note-text">Perbarui status pesanan dan verifikasi bukti pembayaran secara berkala.</span>
             </div>
             <div class="sidebar-footer">
                 <button type="button" class="btn btn-logout-side" onclick="handleLogout()">⎋ Keluar (Logout)</button>
@@ -147,9 +203,9 @@
 
         <div class="main">
             <header class="topbar">
-                <div style="display:flex;align-items:center">
+                <div style="display:flex;align-items:center;gap:12px">
                     <button class="mobile-menu" aria-label="Buka menu">☰</button>
-                    <div>
+                    <div class="topbar-title-wrap">
                         <div class="eyebrow" id="top-eyebrow">LAUNDRY MANAGEMENT SYSTEM</div>
                         <h1 id="top-title">Dashboard</h1>
                     </div>
@@ -165,40 +221,72 @@
             <main class="content">
                 <!-- ==================== ADMIN: DASHBOARD ==================== -->
                 <section class="view" data-view="dashboard">
-                    <div class="page-intro">
-                        <div>
-                            <h2>Selamat datang, Admin! 👋</h2>
-                            <p>Berikut ringkasan aktivitas operasional laundry hari ini.</p>
+                    <!-- Laundry Themed Welcome Banner (Admin) -->
+                    <div class="welcome-banner">
+                        <div class="welcome-banner-text">
+                            <span class="banner-eyebrow">WELCOME TO BOBASOLAUNDRY</span>
+                            <h2>Welcome to BobasoLaundry</h2>
+                            <p class="banner-tagline">Your Laundry, Our Priority.</p>
+                            <p class="banner-desc">Pantau cucian masuk, proses pencucian, hingga verifikasi bukti pembayaran pelanggan dalam satu dashboard.</p>
+                            <div class="banner-actions">
+                                <button class="btn btn-primary" onclick="showView('orders');openOrderModal()">＋ Buat Pesanan Baru</button>
+                                <button class="btn btn-banner-secondary" onclick="showView('orders')">Periksa Bukti Pembayaran →</button>
+                            </div>
                         </div>
-                        <button class="btn btn-primary" onclick="showView('orders');openOrderModal()">＋ Buat Pesanan</button>
+                        <div class="welcome-banner-art" aria-hidden="true">
+                            <!-- Ilustrasi SVG Mesin Cuci, Pakaian Gantung, & Gelembung Sabun -->
+                            <svg viewBox="0 0 280 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="30" cy="32" r="9" fill="rgba(255,255,255,0.14)" stroke="#8cc4ff" stroke-width="1.5" />
+                                <circle cx="48" cy="18" r="5" fill="rgba(255,255,255,0.22)" />
+                                <circle cx="250" cy="30" r="11" fill="rgba(255,255,255,0.12)" stroke="#8cc4ff" stroke-width="1.5" />
+                                <!-- Tiang & Pakaian Digantung -->
+                                <line x1="20" y1="52" x2="112" y2="52" stroke="#8cc4ff" stroke-width="2" stroke-linecap="round" />
+                                <path d="M44 52 L36 62 L52 62 Z" stroke="#ffffff" stroke-width="1.5" fill="none" />
+                                <rect x="33" y="62" width="22" height="32" rx="4" fill="#eaf5ff" stroke="#8cc4ff" stroke-width="1.5" />
+                                <path d="M82 52 L74 62 L90 62 Z" stroke="#ffffff" stroke-width="1.5" fill="none" />
+                                <rect x="71" y="62" width="22" height="28" rx="4" fill="#bfe6d0" stroke="#16845b" stroke-width="1.5" />
+                                <!-- Mesin Cuci Modern -->
+                                <rect x="132" y="18" width="98" height="122" rx="14" fill="#ffffff" stroke="#8cc4ff" stroke-width="2" />
+                                <rect x="132" y="18" width="98" height="28" rx="14" fill="#eaf5ff" />
+                                <circle cx="150" cy="32" r="4.5" fill="#2878d0" />
+                                <circle cx="164" cy="32" r="4.5" fill="#16845b" />
+                                <rect x="192" y="28" width="24" height="8" rx="4" fill="#bfd9f5" />
+                                <circle cx="181" cy="90" r="33" fill="#142b4a" stroke="#2878d0" stroke-width="4" />
+                                <path d="M153 92 C164 80, 178 100, 192 88 C200 81, 206 88, 209 92 A28 28 0 0 1 153 92 Z" fill="#2878d0" />
+                                <circle cx="172" cy="76" r="4" fill="rgba(255,255,255,0.65)" />
+                                <circle cx="192" cy="80" r="2.5" fill="rgba(255,255,255,0.65)" />
+                            </svg>
+                        </div>
                     </div>
+
                     <section aria-label="Ringkasan statistik" class="stats">
                         <article class="stat-card">
-                            <div class="stat-top"><span>Total Pesanan</span><span class="stat-icon">▤</span></div>
+                            <div class="stat-top"><span>Total Pesanan</span><span class="stat-icon">🧺</span></div>
                             <div class="stat-value" id="stat-orders">0</div>
                             <div class="stat-foot">Seluruh pesanan tersimpan</div>
                         </article>
                         <article class="stat-card">
-                            <div class="stat-top"><span>Sedang Diproses</span><span class="stat-icon">◷</span></div>
+                            <div class="stat-top"><span>Sedang Diproses</span><span class="stat-icon">🫧</span></div>
                             <div class="stat-value" id="stat-process">0</div>
-                            <div class="stat-foot">Pesanan dalam pengerjaan</div>
+                            <div class="stat-foot">Pencucian, pengeringan &amp; setrika</div>
                         </article>
                         <article class="stat-card">
-                            <div class="stat-top"><span>Pesanan Selesai</span><span class="stat-icon">✓</span></div>
+                            <div class="stat-top"><span>Pesanan Selesai</span><span class="stat-icon">👕</span></div>
                             <div class="stat-value" id="stat-done">0</div>
-                            <div class="stat-foot">Siap diambil / selesai</div>
+                            <div class="stat-foot">Pakaian bersih &amp; selesai</div>
                         </article>
                         <article class="stat-card">
                             <div class="stat-top"><span>Pendapatan Lunas</span><span class="stat-icon">Rp</span></div>
                             <div class="stat-value" id="stat-revenue">Rp0</div>
-                            <div class="stat-foot">Dari transaksi yang lunas</div>
+                            <div class="stat-foot" id="stat-pending-verify">0 menunggu verifikasi</div>
                         </article>
                     </section>
+
                     <section class="panel">
                         <div class="panel-head">
                             <div>
                                 <h3>Pesanan Terbaru</h3>
-                                <p>Pantau pesanan laundry yang baru dicatat.</p>
+                                <p>Pantau pesanan laundry yang baru dicatat beserta status pembayarannya.</p>
                             </div>
                             <button class="btn btn-light" onclick="showView('orders')">Lihat Semua →</button>
                         </div>
@@ -218,26 +306,32 @@
                             </table>
                         </div>
                     </section>
+
                     <section class="two-col">
                         <article class="panel">
                             <div class="panel-head">
                                 <div>
-                                    <h3>Alur Pelayanan</h3>
-                                    <p>Langkah pengelolaan pesanan laundry.</p>
+                                    <h3>Alur Pelayanan &amp; Kualitas Laundry</h3>
+                                    <p>Standar operasional BobasoLaundry untuk pakaian bersih dan rapi.</p>
                                 </div>
                             </div>
                             <div class="summary-list">
-                                <div class="summary-row"><span>01 · Pesanan diterima</span><strong>Menunggu</strong></div>
-                                <div class="summary-row"><span>02 · Pencucian &amp; Pengeringan</span><strong>Diproses / Dikeringkan</strong></div>
-                                <div class="summary-row"><span>03 · Penyetrikaan &amp; Kemas</span><strong>Sedang Disetrika / Siap Diambil</strong></div>
-                                <div class="summary-row"><span>04 · Diserahkan ke pelanggan</span><strong>Selesai</strong></div>
+                                <div class="summary-row"><span>01 · Penerimaan &amp; Sortir Pakaian</span><strong>Menunggu</strong></div>
+                                <div class="summary-row"><span>02 · Pencucian &amp; Pengeringan Higienis</span><strong>Diproses / Dikeringkan</strong></div>
+                                <div class="summary-row"><span>03 · Setrika Uap &amp; Lipat Rapi</span><strong>Sedang Disetrika / Siap Diambil</strong></div>
+                                <div class="summary-row"><span>04 · Verifikasi Pembayaran &amp; Serah Terima</span><strong>Lunas &amp; Selesai</strong></div>
                             </div>
                         </article>
-                        <aside class="panel">
+                        <aside class="panel laundry-care-card">
                             <div class="panel-head">
-                                <h3>Informasi Sistem</h3>
+                                <h3>Informasi Sistem &amp; Verifikasi</h3>
                             </div>
-                            <div class="notice">Data aplikasi disimpan pada <strong>Local Storage</strong> browser ini. Admin dan Customer membaca sumber data yang sama secara otomatis.</div>
+                            <div class="laundry-care-illustration" aria-hidden="true">
+                                <div class="care-badge"><span>🧺</span>Keranjang Sortir</div>
+                                <div class="care-badge"><span>🫧</span>Deterjen Ramah</div>
+                                <div class="care-badge"><span>👕</span>Lipat &amp; Gantung Rapi</div>
+                            </div>
+                            <div class="notice">Data pesanan, akun pelanggan, dan bukti pembayaran terhubung otomatis pada <strong>Local Storage</strong> &amp; <strong>IndexedDB</strong> browser ini.</div>
                         </aside>
                     </section>
                 </section>
@@ -246,8 +340,8 @@
                 <section class="view" data-view="orders" hidden>
                     <div class="page-intro">
                         <div>
-                            <h2>Manajemen Pesanan</h2>
-                            <p>Catat, cari, ubah, dan pantau status pesanan laundry.</p>
+                            <h2>Manajemen Pesanan &amp; Verifikasi Pembayaran</h2>
+                            <p>Catat pesanan, perbarui tahapan cucian, dan periksa bukti pembayaran pelanggan.</p>
                         </div>
                         <button class="btn btn-primary" onclick="openOrderModal()">＋ Tambah Pesanan</button>
                     </div>
@@ -256,14 +350,21 @@
                             <input aria-label="Cari pesanan" class="field search" id="order-search"
                                 placeholder="Cari ID, nama pelanggan, layanan..." type="search" />
                             <div class="tool-group">
-                                <select aria-label="Filter status" class="field" id="status-filter">
-                                    <option value="">Semua Status</option>
+                                <select aria-label="Filter status pengerjaan" class="field" id="status-filter">
+                                    <option value="">Semua Status Cucian</option>
                                     <option value="Menunggu">Menunggu</option>
                                     <option value="Diproses">Diproses / Sedang Dicuci</option>
                                     <option value="Sedang Dikeringkan">Sedang Dikeringkan</option>
                                     <option value="Sedang Disetrika">Sedang Disetrika</option>
                                     <option value="Siap Diambil">Siap Diambil</option>
                                     <option value="Selesai">Selesai</option>
+                                </select>
+                                <select aria-label="Filter status pembayaran" class="field" id="payment-filter">
+                                    <option value="">Semua Status Bayar</option>
+                                    <option value="Belum Lunas">Belum Lunas</option>
+                                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                                    <option value="Lunas">Lunas</option>
+                                    <option value="Ditolak">Ditolak</option>
                                 </select>
                                 <button class="btn btn-light" onclick="exportOrdersCSV()" type="button">⬇ Export CSV</button>
                             </div>
@@ -277,8 +378,10 @@
                                         <th>Layanan</th>
                                         <th>Berat</th>
                                         <th>Total</th>
-                                        <th>Status</th>
-                                        <th>Pembayaran</th>
+                                        <th>Status Cucian</th>
+                                        <th>Status Pembayaran</th>
+                                        <th>Bukti Pembayaran</th>
+                                        <th>Aksi Verifikasi</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -287,8 +390,10 @@
                         </div>
                     </section>
                     <div class="notice" style="margin-top:16px">Total harga dihitung otomatis berdasarkan <strong>berat
-                            (kg) × harga per kg</strong>. Perubahan status pengerjaan akan langsung tampil pada timeline Customer Dashboard.
+                            (kg) × harga per kg</strong>. Klik <strong>View Payment Proof</strong> untuk memeriksa foto bukti pembayaran yang diunggah Customer.
                     </div>
+
+                    <!-- Modal Tambah/Edit Pesanan -->
                     <div class="modal-backdrop" id="order-modal">
                         <section aria-labelledby="modal-title" aria-modal="true" class="modal" role="dialog">
                             <div class="modal-head">
@@ -336,7 +441,9 @@
                                         <label for="order-payment">Status Pembayaran</label>
                                         <select class="field" id="order-payment">
                                             <option value="Belum Lunas">Belum Lunas</option>
+                                            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
                                             <option value="Lunas">Lunas</option>
+                                            <option value="Ditolak">Ditolak</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -362,7 +469,7 @@
                     <div class="page-intro">
                         <div>
                             <h2>Data Pelanggan</h2>
-                            <p>Kelola informasi pelanggan laundry dengan mudah.</p>
+                            <p>Kelola informasi pelanggan laundry dan akun yang terhubung.</p>
                         </div>
                         <button class="btn btn-primary" onclick="openCustomerModal()">＋ Tambah Pelanggan</button>
                     </div>
@@ -381,6 +488,7 @@
                                         <th>Nama Pelanggan</th>
                                         <th>Nomor Telepon</th>
                                         <th>Alamat</th>
+                                        <th>Akun</th>
                                         <th>Riwayat</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -442,12 +550,12 @@
                             <div class="stat-foot">Akumulasi nilai pesanan</div>
                         </article>
                         <article class="stat-card">
-                            <div class="stat-top"><span>Sudah Dibayar</span><span class="stat-icon">✓</span></div>
+                            <div class="stat-top"><span>Sudah Dibayar (Lunas)</span><span class="stat-icon">✓</span></div>
                             <div class="stat-value" id="report-paid">Rp0</div>
-                            <div class="stat-foot">Pesanan berstatus lunas</div>
+                            <div class="stat-foot">Pesanan terverifikasi lunas</div>
                         </article>
                         <article class="stat-card">
-                            <div class="stat-top"><span>Belum Dibayar</span><span class="stat-icon">◷</span></div>
+                            <div class="stat-top"><span>Belum Lunas / Verifikasi</span><span class="stat-icon">◷</span></div>
                             <div class="stat-value" id="report-unpaid">Rp0</div>
                             <div class="stat-foot">Perlu ditindaklanjuti</div>
                         </article>
@@ -471,7 +579,7 @@
                             <div class="panel-head">
                                 <h3>Catatan Laporan</h3>
                             </div>
-                            <div class="notice">Laporan dihitung langsung dari data pesanan yang tersimpan. Pembayaran simulasi oleh Customer akan otomatis memperbarui status Lunas pada laporan ini.</div>
+                            <div class="notice">Laporan dihitung langsung dari data pesanan yang tersimpan. Verifikasi bukti pembayaran oleh Admin akan otomatis memperbarui total pendapatan Lunas pada laporan ini.</div>
                         </aside>
                     </section>
                     <section class="table-panel">
@@ -497,56 +605,98 @@
 
                 <!-- ==================== CUSTOMER: DASHBOARD & TRACKING ==================== -->
                 <section class="view" data-view="customer-dashboard" hidden>
-                    <div class="customer-hero">
-                        <div>
-                            <span class="badge-pill badge-customer">PORTAL PELANGGAN BOBASOLAUNDRY</span>
-                            <h2>Cek Status Cucian &amp; Tagihan Laundry Anda</h2>
-                            <p>Cari pesanan menggunakan nama pelanggan atau kode pesanan beserta nomor telepon untuk melihat perkembangan cucian dan melakukan pembayaran.</p>
+                    <!-- Laundry Themed Customer Welcome Banner -->
+                    <div class="welcome-banner customer-welcome-banner">
+                        <div class="welcome-banner-text">
+                            <span class="banner-eyebrow">WELCOME TO BOBASOLAUNDRY · YOUR LAUNDRY, OUR PRIORITY.</span>
+                            <h2 id="cust-welcome-title">Hello, Customer!</h2>
+                            <p class="banner-tagline">Welcome back to BobasoLaundry.</p>
+                            <p class="banner-desc">Pantau status pengerjaan cucian Anda secara real-time dan unggah bukti pembayaran dengan mudah.</p>
+                        </div>
+                        <div class="welcome-banner-art" aria-hidden="true">
+                            <!-- Ilustrasi SVG Keranjang Pakaian & Tumpukan Handuk Bersih -->
+                            <svg viewBox="0 0 260 145" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="34" cy="30" r="8" fill="rgba(255,255,255,0.16)" stroke="#8cc4ff" stroke-width="1.5" />
+                                <circle cx="52" cy="18" r="4.5" fill="rgba(255,255,255,0.25)" />
+                                <circle cx="228" cy="28" r="10" fill="rgba(255,255,255,0.15)" stroke="#8cc4ff" stroke-width="1.5" />
+                                <!-- Keranjang Pakaian -->
+                                <rect x="46" y="76" width="84" height="52" rx="10" fill="#ffffff" stroke="#8cc4ff" stroke-width="2" />
+                                <line x1="64" y1="88" x2="64" y2="116" stroke="#2878d0" stroke-width="2" stroke-linecap="round" />
+                                <line x1="88" y1="88" x2="88" y2="116" stroke="#2878d0" stroke-width="2" stroke-linecap="round" />
+                                <line x1="112" y1="88" x2="112" y2="116" stroke="#2878d0" stroke-width="2" stroke-linecap="round" />
+                                <!-- Tumpukan Handuk Rapi -->
+                                <rect x="54" y="61" width="68" height="15" rx="7.5" fill="#eaf5ff" stroke="#2878d0" stroke-width="1.5" />
+                                <rect x="59" y="47" width="58" height="14" rx="7" fill="#bfe6d0" stroke="#16845b" stroke-width="1.5" />
+                                <rect x="64" y="34" width="48" height="13" rx="6.5" fill="#ffffff" stroke="#8cc4ff" stroke-width="1.5" />
+                                <!-- Baju Bersih Digantung -->
+                                <line x1="146" y1="36" x2="226" y2="36" stroke="#8cc4ff" stroke-width="2" stroke-linecap="round" />
+                                <path d="M186 36 L175 48 L197 48 Z" stroke="#ffffff" stroke-width="1.5" fill="none" />
+                                <rect x="168" y="48" width="36" height="56" rx="6" fill="#eaf5ff" stroke="#8cc4ff" stroke-width="1.5" />
+                            </svg>
                         </div>
                     </div>
+
+                    <!-- Statistik Ringkas Pelanggan -->
+                    <section aria-label="Statistik pesanan pelanggan" class="stats stats-3">
+                        <article class="stat-card">
+                            <div class="stat-top"><span>Total Pesanan Saya</span><span class="stat-icon">🧺</span></div>
+                            <div class="stat-value" id="cust-stat-total">0</div>
+                            <div class="stat-foot">Seluruh pesanan terdaftar</div>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-top"><span>Sedang Diproses</span><span class="stat-icon">🫧</span></div>
+                            <div class="stat-value" id="cust-stat-process">0</div>
+                            <div class="stat-foot">Dalam proses pengerjaan</div>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-top"><span>Pesanan Selesai</span><span class="stat-icon">👕</span></div>
+                            <div class="stat-value" id="cust-stat-done">0</div>
+                            <div class="stat-foot">Siap diambil / telah selesai</div>
+                        </article>
+                    </section>
 
                     <!-- 1. Search Order Card -->
                     <section class="panel customer-search-panel">
                         <div class="panel-head">
                             <div>
-                                <h3>1. Cari Pesanan Laundry</h3>
-                                <p>Masukkan Nama Pelanggan atau Kode/ID Pesanan (contoh: <code>#1</code> atau nama Anda). Gunakan nomor telepon sebagai verifikasi opsional/keamanan.</p>
+                                <h3>1. Cari &amp; Pilih Pesanan Laundry</h3>
+                                <p>Cari pesanan milik Anda berdasarkan ID/kode pesanan atau nama pelanggan.</p>
                             </div>
                         </div>
                         <form id="customer-track-form" class="customer-search-grid">
                             <div class="form-group">
                                 <label for="track-query">Nama Pelanggan / ID Pesanan *</label>
-                                <input class="field" id="track-query" type="text" placeholder="Contoh: Andi atau #1" required>
+                                <input class="field" id="track-query" type="text" placeholder="Contoh: nama Anda atau #1" required>
                             </div>
                             <div class="form-group">
                                 <label for="track-phone">Nomor Telepon (Verifikasi)</label>
-                                <input class="field" id="track-phone" type="tel" placeholder="Contoh: 0812xxxxxxxx (opsional / 4 digit akhir)">
+                                <input class="field" id="track-phone" type="tel" placeholder="Contoh: 0812xxxxxxxx">
                             </div>
                             <div class="form-group customer-search-btn-wrap">
                                 <button type="submit" class="btn btn-primary">⌕ Cari Pesanan</button>
-                                <button type="button" class="btn btn-light" onclick="resetCustomerSearch()">Reset</button>
+                                <button type="button" class="btn btn-light" onclick="loadLoggedCustomerOrders()">Tampilkan Pesanan Saya</button>
                             </div>
                         </form>
                         <div id="customer-quick-chips" class="quick-chips"></div>
                     </section>
 
-                    <!-- Pesan hasil pencarian / daftar pesanan cocok -->
+                    <!-- Pesan hasil pencarian / empty state -->
                     <div id="customer-search-feedback" hidden></div>
 
-                    <!-- Daftar pilihan jika ditemukan >1 pesanan -->
+                    <!-- Daftar Pesanan Milik Pelanggan -->
                     <section id="customer-matches-panel" class="panel" hidden>
                         <div class="panel-head">
                             <div>
-                                <h3>Daftar Pesanan Ditemukan</h3>
-                                <p>Pilih salah satu pesanan di bawah ini untuk melihat rincian tracking dan tagihan.</p>
+                                <h3>Daftar Pesanan Anda</h3>
+                                <p>Klik salah satu kartu pesanan di bawah ini untuk melihat tracking, rincian tagihan, dan unggah bukti pembayaran.</p>
                             </div>
                         </div>
                         <div id="customer-matches-list" class="matches-grid"></div>
                     </section>
 
-                    <!-- Area Detail, Tracking, dan Pembayaran -->
+                    <!-- Area Detail, Tracking, dan Upload Bukti Pembayaran -->
                     <div id="customer-order-view" hidden>
-                        <!-- 3. Laundry Tracking Timeline -->
+                        <!-- 2. Laundry Tracking Timeline -->
                         <section class="panel">
                             <div class="panel-head">
                                 <div>
@@ -562,7 +712,7 @@
                             <div class="tracking-steps" id="cust-tracking-steps"></div>
                         </section>
 
-                        <!-- 2. Order Details & 4. Pembayaran Customer -->
+                        <!-- 3. Order Details & 4. Upload Payment Proof -->
                         <section class="two-col customer-detail-grid">
                             <!-- Card Rincian Pesanan -->
                             <article class="panel">
@@ -621,18 +771,14 @@
                                 </div>
                             </article>
 
-                            <!-- Card Pembayaran Simulasi -->
+                            <!-- Card Pembayaran & Upload Payment Proof -->
                             <aside class="panel payment-sim-panel">
                                 <div class="panel-head">
                                     <div>
-                                        <h3>4. Pembayaran Tagihan</h3>
-                                        <p>Simulasi pembayaran online pelanggan.</p>
+                                        <h3>4. Pembayaran &amp; Upload Payment Proof</h3>
+                                        <p>Pilih metode pembayaran dan unggah foto bukti bayar untuk diverifikasi Admin.</p>
                                     </div>
-                                    <span class="demo-tag">SIMULASI / DEMO</span>
-                                </div>
-
-                                <div class="notice demo-warning">
-                                    <strong>Mode Simulasi (DEMO):</strong> Fitur ini hanya simulasi frontend berbasis Local Storage untuk keperluan Final Project kuliah, bukan transaksi uang sungguhan.
+                                    <span class="demo-tag">VERIFIKASI ADMIN</span>
                                 </div>
 
                                 <div class="payment-summary-card">
@@ -645,8 +791,12 @@
                                         <strong id="pay-customer-name">-</strong>
                                     </div>
                                     <div class="summary-row">
-                                        <span>Status Tagihan</span>
+                                        <span>Status Pembayaran</span>
                                         <span id="pay-status-badge" class="pay pay-belum">Belum Lunas</span>
+                                    </div>
+                                    <div class="summary-row" id="pay-proof-date-row" hidden>
+                                        <span>Tanggal Upload Bukti</span>
+                                        <strong id="pay-proof-date-text">-</strong>
                                     </div>
                                     <div class="summary-row total-row">
                                         <span>Total Tagihan</span>
@@ -654,23 +804,43 @@
                                     </div>
                                 </div>
 
-                                <!-- Form Pilih Metode jika Belum Lunas -->
+                                <!-- Box Alasan Penolakan jika Status = Ditolak -->
+                                <div id="payment-rejected-alert" class="rejected-alert-box" hidden>
+                                    <strong>✕ Bukti Pembayaran Ditolak oleh Admin</strong>
+                                    <p id="payment-rejected-reason">Alasan: -</p>
+                                    <small>Silakan unggah ulang bukti pembayaran yang jelas dan sesuai tagihan di bawah ini.</small>
+                                </div>
+
+                                <!-- Box Info jika Menunggu Verifikasi -->
+                                <div id="payment-pending-alert" class="pending-alert-box" hidden>
+                                    <strong>◷ Menunggu Verifikasi Admin</strong>
+                                    <p id="payment-pending-info">Bukti pembayaran telah dikirim dan sedang diperiksa oleh Admin.</p>
+                                    <div id="cust-submitted-proof-wrap" class="submitted-proof-thumb" hidden>
+                                        <img id="cust-submitted-proof-img" alt="Bukti pembayaran terkirim" />
+                                        <div>
+                                            <strong id="cust-submitted-proof-name">-</strong>
+                                            <small id="cust-submitted-proof-time">-</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Pilih Metode & Upload Payment Proof (Tampil jika Belum Lunas / Ditolak / ingin ganti bukti saat Menunggu Verifikasi) -->
                                 <div id="payment-action-area">
                                     <div class="form-group" style="margin-top:14px">
-                                        <label>Pilih Metode Pembayaran (Simulasi) *</label>
+                                        <label>Pilih Metode Pembayaran *</label>
                                         <div class="pay-method-options">
                                             <label class="pay-method-card active" id="label-method-qris">
-                                                <input type="radio" name="sim-pay-method" value="QRIS (Simulasi)" checked onchange="updatePaymentMethodPreview()">
+                                                <input type="radio" name="sim-pay-method" value="QRIS" checked onchange="updatePaymentMethodPreview()">
                                                 <div>
-                                                    <strong>QRIS (Simulasi)</strong>
-                                                    <small>Scan QR Code instan (Demo)</small>
+                                                    <strong>QRIS</strong>
+                                                    <small>Scan QR Code BobasoLaundry</small>
                                                 </div>
                                             </label>
                                             <label class="pay-method-card" id="label-method-bank">
-                                                <input type="radio" name="sim-pay-method" value="Transfer Bank (Simulasi)" onchange="updatePaymentMethodPreview()">
+                                                <input type="radio" name="sim-pay-method" value="Transfer Bank" onchange="updatePaymentMethodPreview()">
                                                 <div>
-                                                    <strong>Transfer Bank (Simulasi)</strong>
-                                                    <small>Virtual Account Bank (Demo)</small>
+                                                    <strong>Transfer Bank</strong>
+                                                    <small>Rekening / Virtual Account</small>
                                                 </div>
                                             </label>
                                         </div>
@@ -683,34 +853,65 @@
                                                 <div class="qr-pattern"></div>
                                             </div>
                                             <div>
-                                                <strong>QRIS BobasoLaundry (DEMO)</strong>
-                                                <p>NMID: ID102026BOBASODEMO</p>
-                                                <small>Klik tombol di bawah untuk mensimulasikan pembayaran berhasil.</small>
+                                                <strong>QRIS BobasoLaundry</strong>
+                                                <p>NMID: ID102026BOBASOLAUNDRY</p>
+                                                <small>Lakukan pembayaran lalu unggah tangkapan layar bukti bayar di bawah ini.</small>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div id="pay-preview-bank" class="pay-method-preview" hidden>
                                         <div class="bank-mock">
-                                            <div class="summary-row"><span>Bank Tujuan (Demo)</span><strong>Bank BCA / Mandiri Virtual Account</strong></div>
-                                            <div class="summary-row"><span>Nomor VA Simulasi</span><code>8801 2026 0000 1234</code></div>
-                                            <div class="summary-row"><span>Atas Nama</span><strong>BobasoLaundry Demo</strong></div>
+                                            <div class="summary-row"><span>Bank Tujuan</span><strong>Bank BCA / Mandiri</strong></div>
+                                            <div class="summary-row"><span>Nomor Rekening</span><code>8801 2026 0000 1234</code></div>
+                                            <div class="summary-row"><span>Atas Nama</span><strong>BobasoLaundry Official</strong></div>
                                         </div>
                                     </div>
 
-                                    <button type="button" class="btn btn-primary btn-block" style="margin-top:16px" onclick="processSimulatedPayment()">
-                                        ✓ Bayar Sekarang (Simulasi DEMO)
-                                    </button>
+                                    <!-- Bagian Upload Payment Proof -->
+                                    <div class="upload-proof-section">
+                                        <div class="upload-proof-head">
+                                            <strong>Upload Payment Proof *</strong>
+                                            <small>Format: JPG, JPEG, PNG, WEBP (Maks. 2 MB)</small>
+                                        </div>
+
+                                        <label for="proof-file-input" class="upload-dropzone" id="proof-dropzone">
+                                            <span class="upload-icon">📤</span>
+                                            <strong>Pilih File Gambar Bukti Pembayaran</strong>
+                                            <small>Klik untuk memilih foto struk atau screenshot transfer</small>
+                                        </label>
+                                        <input type="file" id="proof-file-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden>
+
+                                        <!-- Preview File Sebelum Dikirim -->
+                                        <div id="proof-preview-box" class="proof-preview-box" hidden>
+                                            <div class="proof-preview-img-wrap">
+                                                <img id="proof-preview-img" alt="Preview Bukti Pembayaran">
+                                            </div>
+                                            <div class="proof-preview-meta">
+                                                <div>
+                                                    <strong id="proof-file-name">-</strong>
+                                                    <small id="proof-file-size">-</small>
+                                                </div>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="clearSelectedProofFile()">Hapus / Ganti File</button>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-primary btn-block" style="margin-top:14px" onclick="submitPaymentProof()">
+                                            ✓ Submit Payment Proof
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <!-- Info jika Sudah Lunas -->
+                                <!-- Info jika Sudah Lunas (Terverifikasi Admin) -->
                                 <div id="payment-paid-area" class="paid-confirmation-box" hidden>
                                     <div class="paid-icon">✓</div>
-                                    <h4>Tagihan Sudah Lunas</h4>
-                                    <p id="paid-info-text">Pembayaran telah tercatat pada sistem.</p>
-                                    <button type="button" class="btn btn-light btn-block" onclick="openReceiptModal()">
-                                        ⎙ Lihat &amp; Cetak Bukti Pembayaran (DEMO)
-                                    </button>
+                                    <h4>Pembayaran Terverifikasi Lunas</h4>
+                                    <p id="paid-info-text">Pembayaran telah diverifikasi oleh Admin.</p>
+                                    <div class="paid-actions-stack">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="openReceiptModal()">
+                                            ⎙ Lihat &amp; Cetak Bukti Pembayaran
+                                        </button>
+                                    </div>
                                 </div>
                             </aside>
                         </section>
@@ -721,29 +922,28 @@
                 <section class="view" data-view="customer-history" hidden>
                     <div class="page-intro">
                         <div>
-                            <h2>Riwayat Pembayaran Saya</h2>
-                            <p>Daftar transaksi pembayaran simulasi (DEMO) yang telah dilakukan.</p>
+                            <h2>Riwayat Pembayaran &amp; Pengiriman Bukti</h2>
+                            <p>Daftar pengiriman bukti pembayaran dan status verifikasi dari Admin.</p>
                         </div>
-                        <button class="btn btn-light" onclick="showView('customer-dashboard')" type="button">← Kembali ke Lacak Pesanan</button>
+                        <button class="btn btn-light" onclick="showView('customer-dashboard')" type="button">← Kembali ke Dashboard</button>
                     </div>
                     <section class="table-panel">
                         <div class="table-tools">
                             <input aria-label="Filter riwayat pembayaran" class="field search" id="cust-history-search"
-                                placeholder="Cari nama pelanggan atau ID pesanan..." type="search" />
-                            <span class="demo-tag">HISTORI SIMULASI / DEMO</span>
+                                placeholder="Cari ID pesanan atau metode..." type="search" />
                         </div>
                         <div class="table-wrap">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>No. Referensi</th>
                                         <th>ID Pesanan</th>
                                         <th>Pelanggan</th>
                                         <th>Metode Pembayaran</th>
-                                        <th>Waktu Bayar</th>
+                                        <th>Tanggal Upload Bukti</th>
+                                        <th>Tanggal Verifikasi</th>
                                         <th>Total</th>
-                                        <th>Status</th>
-                                        <th>Bukti</th>
+                                        <th>Status Pembayaran</th>
+                                        <th>Catatan / Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="customer-history-body"></tbody>
@@ -757,11 +957,109 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL BUKTI PEMBAYARAN (SIMULASI) ==================== -->
+    <!-- ==================== MODAL ADMIN: VIEW & VERIFY PAYMENT PROOF ==================== -->
+    <div class="modal-backdrop" id="proof-modal">
+        <section aria-labelledby="proof-modal-title" aria-modal="true" class="modal proof-modal-box" role="dialog">
+            <div class="modal-head">
+                <h3 id="proof-modal-title">Detail &amp; Verifikasi Bukti Pembayaran</h3>
+                <button aria-label="Tutup" class="close" onclick="closeProofModal()">✕</button>
+            </div>
+
+            <div class="proof-modal-meta">
+                <div class="detail-item">
+                    <span>ID Pesanan</span>
+                    <strong id="pm-order-id">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Nama Pelanggan</span>
+                    <strong id="pm-customer-name">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Nomor Telepon</span>
+                    <strong id="pm-customer-phone">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Total Tagihan</span>
+                    <strong id="pm-total">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Metode Pembayaran</span>
+                    <strong id="pm-method">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Tanggal Upload Bukti</span>
+                    <strong id="pm-upload-date">-</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Status Saat Ini</span>
+                    <span id="pm-status-badge" class="pay pay-belum">Belum Lunas</span>
+                </div>
+                <div class="detail-item">
+                    <span>Waktu Verifikasi</span>
+                    <strong id="pm-verified-at">-</strong>
+                </div>
+            </div>
+
+            <div id="pm-note-display" class="notice" style="margin-top:12px" hidden></div>
+
+            <!-- Area Foto Bukti Pembayaran -->
+            <div class="proof-viewer-section">
+                <div class="proof-viewer-head">
+                    <strong id="pm-file-label">Foto Bukti Pembayaran</strong>
+                    <div class="tool-group" id="pm-image-tools" hidden>
+                        <button type="button" class="btn btn-light btn-sm" onclick="toggleZoomProofImage()">🔍 Perbesar / Perkecil</button>
+                        <a id="pm-download-link" class="btn btn-light btn-sm" download="bukti-pembayaran.jpg">⬇ Unduh Bukti</a>
+                    </div>
+                </div>
+                <div id="pm-empty-proof" class="empty-proof-box">
+                    <span>🧾</span>
+                    <strong>No Payment Proof Uploaded</strong>
+                    <small>Pelanggan belum mengunggah foto bukti pembayaran untuk pesanan ini.</small>
+                </div>
+                <div id="pm-image-container" class="proof-image-container" hidden>
+                    <img id="pm-proof-img" alt="Bukti Pembayaran Pelanggan" onclick="toggleZoomProofImage()" title="Klik untuk memperbesar/memperkecil">
+                </div>
+            </div>
+
+            <!-- Kontrol Ubah Status Pembayaran & Verifikasi (Khusus Admin) -->
+            <div id="pm-admin-controls" class="pm-admin-controls">
+                <div class="pm-direct-status-row">
+                    <label for="pm-direct-status">Ubah Status Pembayaran:</label>
+                    <div class="tool-group">
+                        <select id="pm-direct-status" class="field">
+                            <option value="Belum Lunas">Belum Lunas</option>
+                            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                            <option value="Lunas">Lunas</option>
+                            <option value="Ditolak">Ditolak</option>
+                        </select>
+                        <button type="button" class="btn btn-light" onclick="applyDirectPaymentStatus()">Simpan Status</button>
+                    </div>
+                </div>
+
+                <!-- Form Alasan Penolakan -->
+                <div id="reject-reason-box" class="reject-reason-box" hidden>
+                    <label for="reject-reason-input">Alasan Penolakan Bukti Pembayaran *</label>
+                    <input type="text" id="reject-reason-input" class="field" placeholder="Contoh: Nominal tidak sesuai atau foto buram/tidak terbaca">
+                    <div class="form-actions" style="margin-top:10px">
+                        <button type="button" class="btn btn-light btn-sm" onclick="toggleRejectReasonBox(false)">Batal</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmRejectPayment()">Konfirmasi Tolak Pembayaran</button>
+                    </div>
+                </div>
+
+                <div class="pm-verify-actions">
+                    <button type="button" class="btn btn-light" onclick="closeProofModal()">Tutup</button>
+                    <button type="button" class="btn btn-danger" onclick="toggleRejectReasonBox(true)">✕ Reject Payment</button>
+                    <button type="button" class="btn btn-success" onclick="verifyOrderPayment()">✓ Verify Payment (Lunas)</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== MODAL STRUK BUKTI PEMBAYARAN LUNAS ==================== -->
     <div class="modal-backdrop" id="receipt-modal">
         <section aria-labelledby="receipt-modal-title" aria-modal="true" class="modal receipt-modal-box" role="dialog">
             <div class="modal-head no-print">
-                <h3 id="receipt-modal-title">Bukti Pembayaran (Simulasi DEMO)</h3>
+                <h3 id="receipt-modal-title">Bukti Pembayaran Terverifikasi</h3>
                 <button aria-label="Tutup" class="close" onclick="closeReceiptModal()">✕</button>
             </div>
             <div id="receipt-printable" class="receipt-paper">
@@ -769,9 +1067,9 @@
                     <div class="brand-mark">L</div>
                     <div>
                         <h3>BobasoLaundry</h3>
-                        <small>Bukti Pembayaran Laundry · SIMULASI / DEMO</small>
+                        <small>Struk Pembayaran Laundry Resmi</small>
                     </div>
-                    <span class="demo-tag">DEMO</span>
+                    <span class="pay pay-lunas" style="margin-left:auto">LUNAS</span>
                 </div>
                 <div class="receipt-body">
                     <div class="summary-row"><span>No. Referensi</span><strong id="rcp-ref">-</strong></div>
@@ -779,12 +1077,12 @@
                     <div class="summary-row"><span>Nama Pelanggan</span><strong id="rcp-customer">-</strong></div>
                     <div class="summary-row"><span>Layanan &amp; Berat</span><strong id="rcp-service">-</strong></div>
                     <div class="summary-row"><span>Metode Pembayaran</span><strong id="rcp-method">-</strong></div>
-                    <div class="summary-row"><span>Tanggal Pembayaran</span><strong id="rcp-date">-</strong></div>
-                    <div class="summary-row"><span>Status</span><strong style="color:var(--green)">LUNAS (SIMULASI)</strong></div>
+                    <div class="summary-row"><span>Waktu Verifikasi</span><strong id="rcp-date">-</strong></div>
+                    <div class="summary-row"><span>Status</span><strong style="color:var(--green)">LUNAS (TERVERIFIKASI)</strong></div>
                     <div class="summary-row receipt-total"><span>Total Dibayar</span><strong id="rcp-total">Rp0</strong></div>
                 </div>
                 <div class="receipt-footer">
-                    Bukti ini dihasilkan dari simulasi pembayaran Local Storage untuk demonstrasi proyek kuliah (bukan transaksi uang sungguhan).
+                    Terima kasih telah mempercayakan pakaian Anda kepada BobasoLaundry — Your Laundry, Our Priority.
                 </div>
             </div>
             <div class="form-actions no-print">

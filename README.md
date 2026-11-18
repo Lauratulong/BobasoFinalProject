@@ -1,6 +1,6 @@
 # BobasoLaundry — Sistem Manajemen Laundry & Portal Pelanggan
 
-Aplikasi web interaktif untuk mengelola operasional pesanan laundry oleh **Admin** sekaligus portal mandiri bagi **Customer** untuk mencari pesanan, memantau progres cucian (*Laundry Tracking*), melihat tagihan, dan melakukan simulasi pembayaran online. Dibuat sebagai **Final Project Web Design: Interactive Web Application Development** menggunakan **HTML5, CSS3, dan Vanilla JavaScript** (tanpa framework).
+Aplikasi web interaktif untuk mengelola operasional pesanan laundry oleh **Admin** sekaligus portal mandiri bagi **Customer** untuk mendaftarkan akun (*Create Account*), memantau progres cucian (*Laundry Tracking*), melihat tagihan, dan mengunggah bukti pembayaran (*Upload Payment Proof*) untuk diverifikasi Admin. Dibuat sebagai **Final Project Web Design: Interactive Web Application Development** menggunakan **HTML5, CSS3, dan Vanilla JavaScript** (tanpa framework).
 
 > **Anggota kelompok:** isi nama dan NIM anggota di sini
 > **Mata kuliah / dosen:** isi di sini
@@ -10,14 +10,14 @@ Aplikasi web interaktif untuk mengelola operasional pesanan laundry oleh **Admin
 ## Daftar Isi
 
 1. [Deskripsi](#deskripsi)
-2. [Fitur](#fitur)
-3. [Akun Demo Login](#akun-demo-login)
+2. [Fitur Utama](#fitur-utama)
+3. [Informasi Akun Pengujian Dosen](#informasi-akun-pengujian-dosen)
 4. [Screenshot](#screenshot)
 5. [Teknologi](#teknologi)
 6. [Struktur Folder](#struktur-folder)
 7. [Cara Menjalankan](#cara-menjalankan)
-8. [Cara Penggunaan & Skenario Pengujian](#cara-penggunaan--skenario-pengujian)
-9. [Penjelasan Implementasi JavaScript](#penjelasan-implementasi-javascript)
+8. [Alur Penggunaan & Pengujian](#alur-penggunaan--pengujian)
+9. [Penjelasan Struktur Data & Implementasi JavaScript](#penjelasan-struktur-data--implementasi-javascript)
 10. [Aturan Validasi & Proteksi Role](#aturan-validasi--proteksi-role)
 11. [Pemenuhan Ketentuan Project](#pemenuhan-ketentuan-project)
 
@@ -25,52 +25,58 @@ Aplikasi web interaktif untuk mengelola operasional pesanan laundry oleh **Admin
 
 ## Deskripsi
 
-Banyak usaha laundry kecil masih mencatat pesanan secara manual di buku nota. Akibatnya status pengerjaan sulit dipantau baik oleh pengelola maupun pelanggan, pembayaran yang belum lunas mudah terlewat, dan rekap pendapatan harus dihitung sendiri.
+Banyak usaha laundry kecil masih mencatat pesanan dan memeriksa pembayaran secara manual di buku nota. Akibatnya status pengerjaan sulit dipantau baik oleh pengelola maupun pelanggan, bukti transfer tercecer, dan rekap pendapatan harus dihitung sendiri.
 
 **BobasoLaundry** menyelesaikan masalah tersebut dengan satu aplikasi web terintegrasi yang menyediakan dua peran pengguna (**Admin** dan **Customer**):
 
-- **Admin** mencatat pelanggan dan pesanan beserta berat, jenis layanan, tahapan pengerjaan (6 tahap), status pembayaran, rekap laporan pendapatan, serta ekspor data ke CSV.
-- **Customer** mencari pesanan berdasarkan nama atau kode pesanan (dengan verifikasi nomor telepon), memantau perkembangan laundry melalui *timeline* progres 6 tahap, melihat rincian biaya & estimasi selesai, melakukan **simulasi pembayaran (DEMO)** via QRIS atau Transfer Bank, serta mencetak bukti pembayaran.
+- **Customer** dapat membuat akun baru melalui fitur **Create Account**, login ke dashboard pelanggan yang dilengkapi sapaan dinamis (`"Hello, [Customer Name]!"`), melihat statistik pesanan pribadinya, melacak progres laundry melalui *timeline* 6 tahap, memilih metode pembayaran (`QRIS` / `Transfer Bank`), serta mengunggah foto bukti pembayaran (`Upload Payment Proof`).
+- **Admin** mencatat pesanan beserta tahapan pengerjaan, memeriksa foto bukti pembayaran yang diunggah pelanggan melalui modal **View Payment Proof**, serta melakukan **Verify Payment (Lunas)** atau **Reject Payment (Ditolak)** beserta alasan penolakan.
 
-Seluruh data disimpan di **Local Storage** browser (`laundryku_data_v1`) dengan sistem migrasi data non-destruktif sehingga berjalan tanpa server maupun database eksternal.
+Seluruh metadata disimpan di **Local Storage** browser (`laundryku_data_v1`) dengan sistem migrasi non-destruktif, sedangkan file gambar bukti pembayaran disimpan di **IndexedDB** (`BobasoLaundryProofDB`) dengan kompresi Canvas otomatis agar penyimpanan tetap ringan dan cepat.
 
 ---
 
-## Fitur
+## Fitur Utama
 
-### 1. Sistem Autentikasi & Role Access
-- **Halaman Login Modern**: Pilihan tab peran **Admin** dan **Customer** beserta tombol pengisi akun demo sekali klik.
-- **Proteksi Navigasi & Aksi**: Validasi role di JavaScript (`requireAdmin()` & proteksi `showView()`) memastikan Customer tidak dapat mengakses halaman Admin atau mengubah/menghapus data pesanan dan pelanggan.
-- **Manajemen Sesi**: Menyimpan sesi aktif di Local Storage (`laundryku_session_v1`) dan menyediakan tombol **Keluar (Logout)**.
+### 1. Autentikasi & Registrasi Pelanggan (Create Account)
+- **Halaman Login Bersih**: Tanpa panel bocoran akun demo pada UI, dilengkapi pemilih peran **Admin** dan **Customer**.
+- **Create Account Customer**: Tautan *"Don't have an account? Create Account"* membuka form registrasi pelanggan (`Full Name`, `Phone Number`, `Address`, `Username`, `Password`, `Confirm Password`).
+- **Integrasi Otomatis Tanpa Duplikasi**: Saat pelanggan mendaftar, sistem otomatis membuat atau menghubungkan data pada `db.customers` melalui `customerId` tanpa membuat data pelanggan ganda.
+- **Proteksi Navigasi & Role**: Customer hanya dapat mengakses halaman Customer serta hanya dapat melihat pesanan dan bukti pembayaran miliknya sendiri.
 
-### 2. Fitur Admin
-| Tampilan | Fitur |
-|---|---|
-| **Dashboard** | 4 kartu statistik (total pesanan, sedang diproses, selesai, pendapatan lunas), daftar 5 pesanan terbaru beserta status pengerjaan & pembayaran, tombol cepat "Buat Pesanan" |
-| **Manajemen Pesanan** | Tambah, ubah, dan hapus pesanan; pilihan 6 tahapan status pengerjaan; pencarian berdasarkan ID, kode pesanan (`BL-xxxx`), nama pelanggan, atau layanan; filter status pengerjaan; total harga otomatis (`berat × harga/kg`); ekspor data ke CSV |
-| **Data Pelanggan** | Tambah, ubah, dan hapus pelanggan; pencarian nama, telepon, atau alamat; jumlah riwayat pesanan per pelanggan; proteksi penghapusan pelanggan aktif; ekspor data ke CSV |
-| **Laporan** | Nilai seluruh pesanan, total sudah dibayar dan belum dibayar, jumlah transaksi, grafik batang 6 tahapan status pengerjaan, rincian transaksi lengkap, tombol ekspor CSV & cetak laporan |
+### 2. Desain Dashboard Bertema Laundry
+- **Welcome Banner**:
+  - Banner bertuliskan *"Welcome to BobasoLaundry — Your Laundry, Our Priority."* lengkap dengan ilustrasi SVG mesin cuci, keranjang pakaian, tumpukan handuk bersih, pakaian gantung, dan gelembung sabun.
+  - Sapaan dinamis untuk Customer: *"Hello, [Customer Name]! Welcome back to BobasoLaundry."* beserta 3 kartu ringkasan pesanan pelanggan (Total Pesanan, Sedang Diproses, Pesanan Selesai).
 
-### 3. Fitur Customer
+### 3. Fitur Customer — Tracking & Upload Payment Proof
 | Fitur | Deskripsi |
 |---|---|
-| **Search Order** | Pencarian pesanan berdasarkan **Nama Pelanggan** atau **Kode/ID Pesanan** (`#1`, `BL-0001`), dilengkapi **verifikasi nomor telepon** serta tombol pintasan uji pesanan |
-| **Order Details** | Menampilkan kartu informasi lengkap: nama pelanggan, kode pesanan, nomor telepon, tanggal masuk, **estimasi selesai otomatis** (+1 hari untuk Express, +2 hari untuk reguler), jenis layanan, berat, harga/kg, catatan, status pembayaran, dan total biaya |
-| **Laundry Tracking** | Progress bar persentase dan *timeline* 6 tahap pengerjaan: `Menunggu` → `Diproses / Dicuci` → `Sedang Dikeringkan` → `Sedang Disetrika` → `Siap Diambil` → `Selesai` |
-| **Simulasi Pembayaran (DEMO)** | Pilihan metode pembayaran simulasi **QRIS (Simulasi)** dan **Transfer Bank (Simulasi)** dengan label **DEMO**. Mengubah status pesanan menjadi `Lunas` secara langsung di Local Storage |
-| **Bukti & Riwayat Pembayaran** | Menampilkan modal bukti pembayaran simulasi yang dapat dicetak (`window.print()`) serta halaman **Riwayat Pembayaran Saya** |
+| **Search & My Orders** | Menampilkan daftar pesanan milik akun pelanggan yang sedang login serta pencarian berdasarkan ID/kode pesanan (`#1`, `BL-0001`) atau nama dengan verifikasi nomor telepon |
+| **Laundry Tracking (6 Tahap)** | Progress bar persentase dan *timeline* 6 tahap: `Menunggu` → `Diproses / Dicuci` → `Sedang Dikeringkan` → `Sedang Disetrika` → `Siap Diambil` → `Selesai` |
+| **Upload Payment Proof** | Pilihan metode `QRIS` atau `Transfer Bank`, input file gambar (`JPG`, `JPEG`, `PNG`, `WEBP`, maks. 2 MB), preview gambar sebelum dikirim, tombol *Hapus / Ganti File*, dan tombol *Submit Payment Proof* |
+| **Status & Alasan Penolakan** | Menampilkan status `Belum Lunas`, `Menunggu Verifikasi`, `Lunas`, atau `Ditolak`. Jika ditolak Admin, alasan penolakan tampil jelas dan pelanggan dapat mengunggah ulang bukti baru |
+| **Struk & Riwayat Pembayaran** | Cetak struk bukti pembayaran yang sudah diverifikasi Lunas serta tabel **Riwayat Pembayaran & Pengiriman Bukti** |
+
+### 4. Fitur Admin — Manajemen & Verifikasi Pembayaran
+| Tampilan | Fitur |
+|---|---|
+| **Dashboard** | Welcome banner bertema laundry, 4 kartu statistik (total pesanan, sedang diproses, selesai, pendapatan lunas + jumlah bukti menunggu verifikasi), dan tabel 5 pesanan terbaru |
+| **Manajemen Pesanan** | CRUD pesanan, filter status cucian & filter status pembayaran, tombol **View Payment Proof**, tombol aksi cepat **✓ Verify** dan **✕ Reject**, serta **Export CSV** |
+| **Modal View Payment Proof** | Menampilkan detail pesanan, metode pembayaran, waktu unggah, foto bukti pembayaran (dengan fitur **Perbesar/Zoom** & **Unduh Bukti**), atau pesan *"No Payment Proof Uploaded"* jika belum ada bukti |
+| **Verify & Reject Payment** | Admin dapat mengubah status pembayaran secara langsung, menerima bukti (**Verify Payment** → `Lunas`), atau menolak bukti (**Reject Payment** → `Ditolak` dengan input alasan penolakan wajib) |
+| **Data Pelanggan & Laporan** | CRUD pelanggan (menampilkan username akun yang terhubung), laporan pendapatan Lunas vs Belum Lunas, grafik batang 6 tahap status, Export CSV, dan Cetak Laporan |
 
 ---
 
-## Akun Demo Login
+## Informasi Akun Pengujian Dosen
 
-| Role | Username | Password | Hak Akses |
+Untuk keperluan pengujian dan presentasi dosen, gunakan kredensial berikut pada halaman Login:
+
+| Role | Username | Password | Keterangan |
 |---|---|---|---|
-| **Admin** | `admin` | `admin123` | Akses penuh ke Dashboard Admin, CRUD Pesanan, CRUD Pelanggan, Laporan, dan Export CSV |
-| **Customer (Demo)** | `customer` | `customer123` | Akses ke Customer Dashboard, Search Order, Laundry Tracking, Simulasi Pembayaran, dan Riwayat Pembayaran |
-| **Customer (Terdaftar)** | *Nama Pelanggan* (mis. `Andi`) | `customer123` atau *Nomor Telepon* | Masuk sebagai pelanggan tersebut dan langsung memuat daftar pesanannya |
-
-> **Catatan:** Autentikasi dan simulasi pembayaran berbasis Local Storage dibuat khusus untuk demonstrasi Final Project kuliah, bukan untuk keamanan produksi atau transaksi uang sungguhan.
+| **Admin** | `admin` | `admin123` | Akses penuh ke Dashboard Admin, CRUD Pesanan & Pelanggan, Verifikasi Pembayaran, Laporan, dan Export CSV |
+| **Customer** | *(Buat melalui **Create Account**)* | *(Sesuai registrasi, min. 8 karakter)* | Otomatis terhubung ke `db.customers` dan langsung dapat digunakan login |
 
 ---
 
@@ -94,12 +100,10 @@ Seluruh data disimpan di **Local Storage** browser (`laundryku_data_v1`) dengan 
 
 ## Teknologi
 
-- **HTML5** — semantic HTML (`aside`, `nav`, `header`, `main`, `section`, `article`, `footer`)
+- **HTML5** — semantic HTML (`aside`, `nav`, `header`, `main`, `section`, `article`, `footer`) & SVG inline bertema laundry
 - **CSS3** — Flexbox, CSS Grid, variabel CSS (`:root`), media query responsif, `@media print`
-- **JavaScript (Vanilla)** — DOM manipulation, event handling, array dan objek, template literal, `Intl.NumberFormat`, `Blob` CSV exporter
-- **Web Storage API** — `localStorage` dengan format JSON (`laundryku_data_v1` & `laundryku_session_v1`) serta sinkronisasi antar-tab (`storage` event)
-
-Tidak menggunakan React, Vue, Angular, maupun library/framework eksternal.
+- **JavaScript (Vanilla)** — DOM manipulation, event handling, array & objek, `FileReader`, `Canvas` image compression, `Blob` CSV exporter
+- **Web Storage & IndexedDB API** — `localStorage` (`laundryku_data_v1`) untuk data terstruktur dan `IndexedDB` (`BobasoLaundryProofDB`) untuk penyimpanan foto bukti pembayaran
 
 ---
 
@@ -107,9 +111,9 @@ Tidak menggunakan React, Vue, Angular, maupun library/framework eksternal.
 
 ```
 BobasoFinalProject-main/
-├── index.html          # Halaman Login, 4 tampilan Admin, 2 tampilan Customer, dan Modal
-├── style.css           # Seluruh gaya, palet warna, timeline tracking, dan media query
-├── app.js              # Autentikasi role, migrasi data, CRUD, tracking, simulasi bayar, CSV
+├── index.html          # Halaman Login, Create Account, Dashboard Admin & Customer, Modal Verifikasi
+├── style.css           # Seluruh gaya, palet warna, banner laundry, badge, modal, dan media query
+├── app.js              # Registrasi, autentikasi role, IndexedDB bukti bayar, verifikasi Admin, CRUD, CSV
 ├── screenshots/        # Gambar untuk dokumentasi README
 ├── PPT WEB DESIGN.pptx # File presentasi project
 └── README.md
@@ -119,76 +123,65 @@ BobasoFinalProject-main/
 
 ## Cara Menjalankan
 
-Tidak ada instalasi atau build step.
-
-**Opsi 1 — Langsung dari file**
 1. Buka folder project di komputer Anda.
-2. Klik dua kali atau buka `index.html` menggunakan browser modern (Chrome, Edge, Firefox, Safari).
-
-**Opsi 2 — Dengan Live Server (Visual Studio Code)**
-1. Buka folder project di Visual Studio Code.
-2. Pasang ekstensi **Live Server**.
-3. Klik kanan `index.html`, lalu pilih **Open with Live Server**.
+2. Buka `index.html` langsung di browser modern (Chrome, Edge, Firefox, Safari) atau jalankan melalui ekstensi **Live Server** di Visual Studio Code.
 
 ---
 
-## Cara Penggunaan & Skenario Pengujian
+## Alur Penggunaan & Pengujian
 
-1. **Login sebagai Admin** — Pilih tab **Admin**, klik kotak demo `admin / admin123`, lalu klik **Masuk Sekarang**.
-2. **Tambah Pelanggan & Pesanan** — Buka **Data Pelanggan**, tambahkan pelanggan baru (misal: `Andi`, `081234567890`). Buka **Manajemen Pesanan**, buat pesanan untuk `Andi` dengan status `Menunggu` dan pembayaran `Belum Lunas`.
-3. **Login sebagai Customer** — Klik **Keluar**, lalu masuk dengan akun demo **Customer** (`customer / customer123`).
-4. **Cari & Lacak Pesanan** — Ketik `Andi` (atau klik tombol *Pintasan Uji Pesanan*) dan nomor teleponnya, lalu klik **Cari Pesanan**. Lihat kartu **Rincian Pesanan** dan **Timeline Tracking Laundry**.
-5. **Simulasi Pembayaran (DEMO)** — Pada panel **Pembayaran Tagihan**, pilih metode `QRIS (Simulasi)` atau `Transfer Bank (Simulasi)`, lalu klik **Bayar Sekarang (Simulasi DEMO)**. Bukti pembayaran akan muncul dan siap dicetak.
-6. **Verifikasi Sinkronisasi ke Admin** — Keluar dan masuk kembali sebagai **Admin**. Status pembayaran pesanan `Andi` otomatis berubah menjadi **Lunas** di Dashboard, Manajemen Pesanan, dan Laporan Laundry.
-
-### Reset data
-
-Untuk menghapus seluruh data tersimpan dan memulai dari kosong, jalankan di Console browser:
-
-```js
-localStorage.removeItem("laundryku_data_v1");
-localStorage.removeItem("laundryku_session_v1");
-location.reload();
-```
+1. **Buat Akun Customer (`Create Account`)**:
+   - Pada halaman Login, klik **Create Account** di bagian bawah form.
+   - Isi `Full Name`, `Phone Number` (misal `081234567890`), `Address`, `Username` (min. 4 karakter), `Password` (min. 8 karakter), dan `Confirm Password`.
+   - Klik **Create Account →**. Sistem menyimpan akun dan membuat data pelanggan baru, lalu mengarahkan kembali ke halaman Login.
+2. **Admin Membuat Pesanan**:
+   - Login sebagai **Admin** (`admin` / `admin123`).
+   - Buka **Manajemen Pesanan** → klik **＋ Tambah Pesanan** → pilih pelanggan yang baru mendaftar, isi layanan dan berat, lalu simpan.
+3. **Customer Mengunggah Bukti Pembayaran**:
+   - Logout dari Admin, lalu login sebagai **Customer** menggunakan akun yang baru dibuat.
+   - Lihat pesanan pada **Customer Dashboard**, pilih metode pembayaran (`QRIS` atau `Transfer Bank`), pilih file gambar (`JPG`/`PNG`/`WEBP`, maks. 2 MB) pada bagian **Upload Payment Proof**, periksa preview gambar, lalu klik **✓ Submit Payment Proof**.
+   - Status pembayaran berubah menjadi **Menunggu Verifikasi**.
+4. **Admin Memeriksa & Memverifikasi Bukti Pembayaran**:
+   - Login kembali sebagai **Admin** → buka **Manajemen Pesanan**.
+   - Klik **🧾 View Payment Proof** pada baris pesanan tersebut untuk melihat foto bukti pembayaran.
+   - Klik **✓ Verify Payment (Lunas)** untuk menyetujui pembayaran, atau **✕ Reject Payment** dan isi alasan penolakan untuk menolak bukti.
+5. **Customer Melihat Hasil Verifikasi**:
+   - Login kembali sebagai **Customer**. Jika disetujui, status menjadi **Lunas** dan struk dapat dicetak. Jika ditolak, alasan penolakan ditampilkan dan Customer dapat mengunggah ulang bukti pembayaran.
 
 ---
 
-## Penjelasan Implementasi JavaScript
+## Penjelasan Struktur Data & Implementasi JavaScript
 
-Semua logika berada di `app.js`.
-
-### Model Data (`laundryku_data_v1`)
+Data utama disimpan pada Local Storage dengan key `laundryku_data_v1`:
 
 ```js
 db = {
-  customers: [{ id, name, phone, address }],
-  orders:    [{ id, customerId, service, weight, price,
-                status, payment, date, note, paymentMethod, paidAt, paymentRef }],
-  payments:  [{ id, refCode, orderId, customerId, customerName, method, amount, date }]
+  customers: [
+    { id, name, phone, address }
+  ],
+  accounts: [
+    { id, customerId, username, password, role: "customer" }
+  ],
+  orders: [
+    {
+      id, customerId, service, weight, price, status, payment, date, note,
+      paymentMethod, paymentProofId, paymentProofName, paymentProofDate,
+      paymentStatus, paymentNote, verifiedAt
+    }
+  ],
+  payments: [
+    { id, refCode, orderId, customerId, customerName, method, amount, date, verifiedAt, status, note }
+  ]
 };
 ```
-
-Fungsi `migrateData()` memastikan data lama yang hanya memiliki `customers` dan `orders` tetap terbaca utuh tanpa kehilangan data.
-
-### Fungsi Penting
-
-| Fungsi | Peran |
-|---|---|
-| `loadData()` / `migrateData()` / `save()` | Membaca, memigrasikan, dan menyimpan data ke Local Storage (`laundryku_data_v1`) |
-| `handleLogin()` / `handleLogout()` / `requireAdmin()` | Mengelola autentikasi role Admin & Customer serta memblokir akses tidak sah |
-| `renderDashboard()` / `renderOrders()` / `renderCustomers()` / `renderReports()` | Merender seluruh tampilan Admin beserta pencarian, filter, dan grafik |
-| `searchCustomerOrders()` / `renderCustomerOrderDetail()` | Mencari pesanan pelanggan (dengan verifikasi telepon), menampilkan rincian pesanan, estimasi selesai, dan 6 tahap timeline tracking |
-| `processSimulatedPayment()` / `openReceiptModal()` | Memproses simulasi pembayaran DEMO, memperbarui status pesanan menjadi `Lunas`, mencatat riwayat pembayaran, dan menampilkan bukti cetak |
-| `exportOrdersCSV()` / `exportCustomersCSV()` | Mengekspor data pesanan dan pelanggan ke file `.csv` |
 
 ---
 
 ## Aturan Validasi & Proteksi Role
 
-- **Login**: Username dan password wajib diisi serta divalidasi sesuai role yang dipilih.
-- **Proteksi Role**: Customer yang mencoba memanggil halaman atau fungsi Admin akan diblokir oleh `requireAdmin()` dan `showView()`.
-- **Pesanan**: Pelanggan wajib dipilih, berat dan harga per kg harus berupa angka valid lebih dari 0, dan tanggal masuk wajib diisi.
-- **Pelanggan**: Nama minimal 2 karakter, alamat minimal 3 karakter, dan nomor telepon wajib sesuai format `/^(\+62|0)[0-9]{8,13}$/`.
+- **Registrasi Customer**: Semua kolom wajib diisi, nama $\ge 2$ karakter, telepon sesuai `/^(\+62|0)[0-9]{8,13}$/`, alamat $\ge 3$ karakter, username $\ge 4$ karakter tanpa spasi & belum terdaftar, password $\ge 8$ karakter, dan confirm password harus cocok.
+- **Upload Bukti Pembayaran**: Wajib memilih file, format harus `JPG`, `JPEG`, `PNG`, atau `WEBP`, ukuran maksimal `2 MB`. Customer hanya dapat mengubah status menjadi `Menunggu Verifikasi` (tidak bisa langsung menjadi `Lunas`).
+- **Verifikasi Admin**: Hanya Admin yang dapat mengubah status menjadi `Lunas` atau `Ditolak`. Penolakan wajib disertai alasan penolakan.
 
 ---
 
@@ -196,14 +189,12 @@ Fungsi `migrateData()` memastikan data lama yang hanya memiliki `customers` dan 
 
 | Ketentuan | Implementasi |
 |---|---|
-| Halaman Login & Multi-Role | Login Admin (`admin/admin123`) & Customer (`customer/customer123`) dengan proteksi akses |
-| Tampilan Lengkap | Login, Admin (Dashboard, Pesanan, Pelanggan, Laporan), Customer (Lacak & Bayar, Riwayat Pembayaran) |
-| CRUD & Export | CRUD Pesanan & Pelanggan + Export CSV |
-| Search, Filter & Tracking | Pencarian & filter di Admin; Search Order + Verifikasi Telepon + 6 Tahap Laundry Tracking di Customer |
-| Simulasi Pembayaran | Simulasi QRIS & Transfer Bank berlabel DEMO + Cetak Bukti Pembayaran |
-| Local Storage Shared State | Admin & Customer terhubung pada `laundryku_data_v1` yang sama |
-| Responsive Design | Desktop, Tablet (`1000px`), dan Mobile (`700px`) |
-| HTML5, CSS3, Vanilla JS | Murni tanpa framework frontend maupun database eksternal |
+| Create Account Customer | Form registrasi lengkap dengan validasi & integrasi otomatis ke `db.customers` |
+| Tanpa Panduan Demo di UI Login | Panel akun demo dihapus dari halaman Login; kredensial Admin didokumentasikan di README |
+| Desain Bertema Laundry | Welcome banner & empty state dengan ilustrasi SVG mesin cuci, keranjang, handuk, dan pakaian gantung |
+| Upload Payment Proof (Customer) | Validasi format & ukuran 2 MB, preview gambar, penyimpanan IndexedDB, status `Menunggu Verifikasi` |
+| Payment Verification (Admin) | Modal `View Payment Proof`, zoom/unduh bukti, `Verify Payment (Lunas)`, dan `Reject Payment` dengan alasan |
+| Sinkronisasi & Privasi Role | Terhubung melalui `customerId` & `orderId` pada `laundryku_data_v1`; Customer hanya melihat pesanannya sendiri |
 
 ---
 
