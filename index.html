@@ -5,52 +5,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="BobasoLaundry - Sistem Manajemen Laundry">
-    <title>BobasoLaundry | Sistem Manajemen Laundry WDS</title>
-   <link rel="stylesheet" href="style.css">
+    <title>BobasoLaundry | Sistem Manajemen Laundry</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="app">
-        <aside class="sidebar">
+    <!-- ==================== HALAMAN LOGIN ==================== -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-brand-panel">
+                <div class="brand">
+                    <div class="brand-mark">L</div>
+                    <div>
+                        <h2>BobasoLaundry</h2>
+                        <small>Laundry Management &amp; Tracking System</small>
+                    </div>
+                </div>
+                <div class="login-hero-text">
+                    <h1>Kelola &amp; Pantau Laundry Lebih Mudah dalam Satu Sistem.</h1>
+                    <p>Platform terintegrasi untuk Admin operasional laundry dan Pelanggan untuk melacak status cucian serta simulasi pembayaran secara langsung.</p>
+                </div>
+                <div class="login-features">
+                    <div class="login-feature-item">
+                        <span class="login-feature-icon">▦</span>
+                        <div>
+                            <strong>Panel Admin Lengkap</strong>
+                            <small>Kelola pesanan, data pelanggan, laporan pendapatan, dan ekspor CSV.</small>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <span class="login-feature-icon">◷</span>
+                        <div>
+                            <strong>Pelacakan Status Real-Time</strong>
+                            <small>Pantau perkembangan cucian dari diterima hingga siap diambil.</small>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <span class="login-feature-icon">✓</span>
+                        <div>
+                            <strong>Simulasi Pembayaran (DEMO)</strong>
+                            <small>Cek tagihan, bayar dengan simulasi QRIS/Transfer, dan cetak bukti.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="login-brand-foot">© 2026 BobasoLaundry · Final Project Web Design</div>
+            </div>
+
+            <div class="login-form-panel">
+                <div class="login-card">
+                    <div class="login-head">
+                        <span class="badge-pill">SISTEM AKSES PENGGUNA</span>
+                        <h2>Masuk ke Akun Anda</h2>
+                        <p>Pilih peran akses dan masukkan kredensial untuk melanjutkan.</p>
+                    </div>
+
+                    <div class="role-tabs" role="tablist" aria-label="Pilih Peran Login">
+                        <button type="button" class="role-tab active" data-role="admin" id="tab-role-admin" onclick="selectLoginRole('admin')">
+                            <span class="role-tab-icon">🛡️</span>
+                            <div>
+                                <strong>Admin</strong>
+                                <small>Manajemen Laundry</small>
+                            </div>
+                        </button>
+                        <button type="button" class="role-tab" data-role="customer" id="tab-role-customer" onclick="selectLoginRole('customer')">
+                            <span class="role-tab-icon">👤</span>
+                            <div>
+                                <strong>Customer</strong>
+                                <small>Cek &amp; Bayar Laundry</small>
+                            </div>
+                        </button>
+                    </div>
+
+                    <form id="login-form" novalidate>
+                        <input type="hidden" id="login-role" value="admin">
+                        <div class="form-group">
+                            <label for="login-username">Username *</label>
+                            <input class="field" id="login-username" type="text" placeholder="Masukkan username" required autocomplete="username">
+                        </div>
+                        <div class="form-group" style="margin-top:14px">
+                            <label for="login-password">Password *</label>
+                            <input class="field" id="login-password" type="password" placeholder="Masukkan password" required autocomplete="current-password">
+                        </div>
+                        <div id="login-error" class="login-error" hidden></div>
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:18px">Masuk Sekarang →</button>
+                    </form>
+
+                    <div class="demo-credentials">
+                        <div class="demo-head">
+                            <strong>Akun Demo (Klik untuk isi otomatis)</strong>
+                            <span class="demo-tag">DEMO KULIAH</span>
+                        </div>
+                        <div class="demo-grid">
+                            <button type="button" class="demo-box" onclick="fillDemoAccount('admin')">
+                                <span class="demo-role">Admin Demo</span>
+                                <code>admin / admin123</code>
+                            </button>
+                            <button type="button" class="demo-box" onclick="fillDemoAccount('customer')">
+                                <span class="demo-role">Customer Demo</span>
+                                <code>customer / customer123</code>
+                            </button>
+                        </div>
+                        <small class="demo-note">Autentikasi berbasis Local Storage untuk demonstrasi Final Project Web Design.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== APLIKASI UTAMA ==================== -->
+    <div class="app" id="app-shell" hidden>
+        <aside class="sidebar" id="app-sidebar">
             <div class="brand">
                 <div class="brand-mark">L</div>
                 <div>
-                    <h2>BobasoLaundry</h2><small>Management System</small>
+                    <h2>BobasoLaundry</h2><small id="sidebar-subtitle">Management System</small>
                 </div>
             </div>
             <div>
-                <div class="nav-label">MENU UTAMA</div>
-                <nav class="nav-list">
+                <div class="nav-label" id="nav-section-label">MENU UTAMA</div>
+                <!-- Menu Admin -->
+                <nav class="nav-list" id="admin-nav">
                     <a href="#" data-page="dashboard"><span class="nav-icon">▦</span>Dashboard</a>
                     <a href="#" data-page="orders"><span class="nav-icon">▤</span>Manajemen Pesanan</a>
                     <a href="#" data-page="customers"><span class="nav-icon">♙</span>Data Pelanggan</a>
                     <a href="#" data-page="reports"><span class="nav-icon">▥</span>Laporan</a>
                 </nav>
+                <!-- Menu Customer -->
+                <nav class="nav-list" id="customer-nav" hidden>
+                    <a href="#" data-page="customer-dashboard" class="active"><span class="nav-icon">⌕</span>Lacak &amp; Bayar Pesanan</a>
+                    <a href="#" data-page="customer-history"><span class="nav-icon">▤</span>Riwayat Pembayaran</a>
+                </nav>
             </div>
-            <div class="sidebar-note"><strong>Tips BobasoLaundry</strong><br>Perbarui status pesanan secara berkala agar
-                pelanggan mendapatkan informasi yang tepat.</div>
+            <div class="sidebar-note" id="sidebar-note-box">
+                <strong>Tips BobasoLaundry</strong><br>
+                <span id="sidebar-note-text">Perbarui status pesanan secara berkala agar pelanggan mendapatkan informasi yang tepat.</span>
+            </div>
+            <div class="sidebar-footer">
+                <button type="button" class="btn btn-logout-side" onclick="handleLogout()">⎋ Keluar (Logout)</button>
+            </div>
         </aside>
+
         <div class="main">
             <header class="topbar">
-                <div style="display:flex;align-items:center"><button class="mobile-menu"
-                        aria-label="Buka menu">☰</button>
+                <div style="display:flex;align-items:center">
+                    <button class="mobile-menu" aria-label="Buka menu">☰</button>
                     <div>
-                        <div class="eyebrow">LAUNDRY MANAGEMENT SYSTEM</div>
+                        <div class="eyebrow" id="top-eyebrow">LAUNDRY MANAGEMENT SYSTEM</div>
                         <h1 id="top-title">Dashboard</h1>
                     </div>
                 </div>
                 <div class="user">
-                    <div class="avatar">A</div><span>Admin Laundry</span>
+                    <span class="role-badge" id="active-role-badge">ADMIN</span>
+                    <div class="avatar" id="active-user-avatar">A</div>
+                    <span id="active-user-name">Admin Laundry</span>
+                    <button type="button" class="btn btn-light btn-sm" onclick="handleLogout()" title="Keluar dari sesi">Keluar</button>
                 </div>
             </header>
+
             <main class="content">
+                <!-- ==================== ADMIN: DASHBOARD ==================== -->
                 <section class="view" data-view="dashboard">
                     <div class="page-intro">
                         <div>
                             <h2>Selamat datang, Admin! 👋</h2>
                             <p>Berikut ringkasan aktivitas operasional laundry hari ini.</p>
-                        </div><button class="btn btn-primary" onclick="showView('orders');openOrderModal()">＋ Buat
-                            Pesanan</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="showView('orders');openOrderModal()">＋ Buat Pesanan</button>
                     </div>
                     <section aria-label="Ringkasan statistik" class="stats">
                         <article class="stat-card">
@@ -66,7 +186,7 @@
                         <article class="stat-card">
                             <div class="stat-top"><span>Pesanan Selesai</span><span class="stat-icon">✓</span></div>
                             <div class="stat-value" id="stat-done">0</div>
-                            <div class="stat-foot">Siap diambil pelanggan</div>
+                            <div class="stat-foot">Siap diambil / selesai</div>
                         </article>
                         <article class="stat-card">
                             <div class="stat-top"><span>Pendapatan Lunas</span><span class="stat-icon">Rp</span></div>
@@ -79,7 +199,8 @@
                             <div>
                                 <h3>Pesanan Terbaru</h3>
                                 <p>Pantau pesanan laundry yang baru dicatat.</p>
-                            </div><button class="btn btn-light" onclick="showView('orders')">Lihat Semua →</button>
+                            </div>
+                            <button class="btn btn-light" onclick="showView('orders')">Lihat Semua →</button>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -89,6 +210,7 @@
                                         <th>Pelanggan</th>
                                         <th>Layanan</th>
                                         <th>Status</th>
+                                        <th>Pembayaran</th>
                                         <th>Total</th>
                                     </tr>
                                 </thead>
@@ -105,38 +227,46 @@
                                 </div>
                             </div>
                             <div class="summary-list">
-                                <div class="summary-row"><span>01 · Pesanan diterima</span><strong>Menunggu</strong>
-                                </div>
-                                <div class="summary-row"><span>02 · Proses pencucian</span><strong>Diproses</strong>
-                                </div>
-                                <div class="summary-row"><span>03 · Siap diambil</span><strong>Selesai</strong></div>
+                                <div class="summary-row"><span>01 · Pesanan diterima</span><strong>Menunggu</strong></div>
+                                <div class="summary-row"><span>02 · Pencucian &amp; Pengeringan</span><strong>Diproses / Dikeringkan</strong></div>
+                                <div class="summary-row"><span>03 · Penyetrikaan &amp; Kemas</span><strong>Sedang Disetrika / Siap Diambil</strong></div>
+                                <div class="summary-row"><span>04 · Diserahkan ke pelanggan</span><strong>Selesai</strong></div>
                             </div>
                         </article>
                         <aside class="panel">
                             <div class="panel-head">
                                 <h3>Informasi Sistem</h3>
                             </div>
-                            <div class="notice">Data aplikasi disimpan pada <strong>Local Storage</strong> browser ini.
-                                Gunakan browser dan perangkat yang sama agar data tetap tersedia.</div>
+                            <div class="notice">Data aplikasi disimpan pada <strong>Local Storage</strong> browser ini. Admin dan Customer membaca sumber data yang sama secara otomatis.</div>
                         </aside>
                     </section>
                 </section>
+
+                <!-- ==================== ADMIN: MANAJEMEN PESANAN ==================== -->
                 <section class="view" data-view="orders" hidden>
                     <div class="page-intro">
                         <div>
                             <h2>Manajemen Pesanan</h2>
                             <p>Catat, cari, ubah, dan pantau status pesanan laundry.</p>
-                        </div><button class="btn btn-primary" onclick="openOrderModal()">＋ Tambah Pesanan</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="openOrderModal()">＋ Tambah Pesanan</button>
                     </div>
                     <section class="table-panel">
-                        <div class="table-tools"><input aria-label="Cari pesanan" class="field search" id="order-search"
+                        <div class="table-tools">
+                            <input aria-label="Cari pesanan" class="field search" id="order-search"
                                 placeholder="Cari ID, nama pelanggan, layanan..." type="search" />
-                            <div class="tool-group"><select aria-label="Filter status" class="field" id="status-filter">
+                            <div class="tool-group">
+                                <select aria-label="Filter status" class="field" id="status-filter">
                                     <option value="">Semua Status</option>
-                                    <option>Menunggu</option>
-                                    <option>Diproses</option>
-                                    <option>Selesai</option>
-                                </select><button class="btn btn-light" onclick="exportOrdersCSV()" type="button">⬇ Export CSV</button></div>
+                                    <option value="Menunggu">Menunggu</option>
+                                    <option value="Diproses">Diproses / Sedang Dicuci</option>
+                                    <option value="Sedang Dikeringkan">Sedang Dikeringkan</option>
+                                    <option value="Sedang Disetrika">Sedang Disetrika</option>
+                                    <option value="Siap Diambil">Siap Diambil</option>
+                                    <option value="Selesai">Selesai</option>
+                                </select>
+                                <button class="btn btn-light" onclick="exportOrdersCSV()" type="button">⬇ Export CSV</button>
+                            </div>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -157,65 +287,92 @@
                         </div>
                     </section>
                     <div class="notice" style="margin-top:16px">Total harga dihitung otomatis berdasarkan <strong>berat
-                            (kg) × harga per kg</strong>. Pilih status pengerjaan dan pembayaran sesuai kondisi pesanan.
+                            (kg) × harga per kg</strong>. Perubahan status pengerjaan akan langsung tampil pada timeline Customer Dashboard.
                     </div>
                     <div class="modal-backdrop" id="order-modal">
                         <section aria-labelledby="modal-title" aria-modal="true" class="modal" role="dialog">
                             <div class="modal-head">
-                                <h3 id="modal-title">Tambah Pesanan</h3><button aria-label="Tutup" class="close"
-                                    onclick="closeOrderModal()">✕</button>
+                                <h3 id="modal-title">Tambah Pesanan</h3>
+                                <button aria-label="Tutup" class="close" onclick="closeOrderModal()">✕</button>
                             </div>
-                            <form id="order-form"><input id="order-id" type="hidden" />
+                            <form id="order-form">
+                                <input id="order-id" type="hidden" />
                                 <div class="form-grid">
-                                    <div class="form-group"><label for="order-customer">Pelanggan *</label><select
-                                            class="field" id="order-customer" required=""></select></div>
-                                    <div class="form-group"><label for="order-service">Jenis Layanan *</label><select
-                                            class="field" id="order-service" required="">
+                                    <div class="form-group">
+                                        <label for="order-customer">Pelanggan *</label>
+                                        <select class="field" id="order-customer" required=""></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-service">Jenis Layanan *</label>
+                                        <select class="field" id="order-service" required="">
                                             <option value="Cuci &amp; Setrika">Cuci &amp; Setrika</option>
                                             <option value="Cuci Kering">Cuci Kering</option>
                                             <option value="Setrika">Setrika</option>
                                             <option value="Laundry Express">Laundry Express</option>
-                                        </select></div>
-                                    <div class="form-group"><label for="order-weight">Berat (kg) *</label><input
-                                            class="field" id="order-weight" min="0.1" placeholder="Contoh: 3.5"
-                                            required="" step="0.01" type="number" /></div>
-                                    <div class="form-group"><label for="order-price">Harga per kg (Rp) *</label><input
-                                            class="field" id="order-price" min="1" required="" step="1" type="number"
-                                            value="7000" /></div>
-                                    <div class="form-group"><label for="order-status">Status Pengerjaan</label><select
-                                            class="field" id="order-status">
-                                            <option>Menunggu</option>
-                                            <option>Diproses</option>
-                                            <option>Selesai</option>
-                                        </select></div>
-                                    <div class="form-group"><label for="order-payment">Status Pembayaran</label><select
-                                            class="field" id="order-payment">
-                                            <option>Belum Lunas</option>
-                                            <option>Lunas</option>
-                                        </select></div>
-                                    <div class="form-group"><label for="order-date">Tanggal Masuk *</label><input
-                                            class="field" id="order-date" required="" type="date" /></div>
-                                    <div class="form-group"><label for="order-note">Catatan</label><input class="field"
-                                            id="order-note" placeholder="Catatan tambahan (opsional)" /></div>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-weight">Berat (kg) *</label>
+                                        <input class="field" id="order-weight" min="0.1" placeholder="Contoh: 3.5"
+                                            required="" step="0.01" type="number" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-price">Harga per kg (Rp) *</label>
+                                        <input class="field" id="order-price" min="1" required="" step="1" type="number"
+                                            value="7000" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-status">Status Pengerjaan</label>
+                                        <select class="field" id="order-status">
+                                            <option value="Menunggu">Menunggu</option>
+                                            <option value="Diproses">Diproses (Sedang Dicuci)</option>
+                                            <option value="Sedang Dikeringkan">Sedang Dikeringkan</option>
+                                            <option value="Sedang Disetrika">Sedang Disetrika</option>
+                                            <option value="Siap Diambil">Siap Diambil</option>
+                                            <option value="Selesai">Selesai</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-payment">Status Pembayaran</label>
+                                        <select class="field" id="order-payment">
+                                            <option value="Belum Lunas">Belum Lunas</option>
+                                            <option value="Lunas">Lunas</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-date">Tanggal Masuk *</label>
+                                        <input class="field" id="order-date" required="" type="date" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-note">Catatan</label>
+                                        <input class="field" id="order-note" placeholder="Catatan tambahan (opsional)" />
+                                    </div>
                                 </div>
-                                <div class="form-actions"><button class="btn btn-light" onclick="closeOrderModal()"
-                                        type="button">Batal</button><button class="btn btn-primary" type="submit">Simpan
-                                        Pesanan</button></div>
+                                <div class="form-actions">
+                                    <button class="btn btn-light" onclick="closeOrderModal()" type="button">Batal</button>
+                                    <button class="btn btn-primary" type="submit">Simpan Pesanan</button>
+                                </div>
                             </form>
                         </section>
                     </div>
                 </section>
+
+                <!-- ==================== ADMIN: DATA PELANGGAN ==================== -->
                 <section class="view" data-view="customers" hidden>
                     <div class="page-intro">
                         <div>
                             <h2>Data Pelanggan</h2>
                             <p>Kelola informasi pelanggan laundry dengan mudah.</p>
-                        </div><button class="btn btn-primary" onclick="openCustomerModal()">＋ Tambah Pelanggan</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="openCustomerModal()">＋ Tambah Pelanggan</button>
                     </div>
                     <section class="table-panel">
-                        <div class="table-tools"><input aria-label="Cari pelanggan" class="field search"
+                        <div class="table-tools">
+                            <input aria-label="Cari pelanggan" class="field search"
                                 id="customer-search" placeholder="Cari nama, nomor telepon, alamat..." type="search" />
-                            <div class="tool-group"><button class="btn btn-light" onclick="exportCustomersCSV()" type="button">⬇ Export CSV</button></div>
+                            <div class="tool-group">
+                                <button class="btn btn-light" onclick="exportCustomersCSV()" type="button">⬇ Export CSV</button>
+                            </div>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -235,28 +392,38 @@
                     <div class="modal-backdrop" id="customer-modal">
                         <section aria-labelledby="customer-modal-title" aria-modal="true" class="modal" role="dialog">
                             <div class="modal-head">
-                                <h3 id="customer-modal-title">Tambah Pelanggan</h3><button aria-label="Tutup"
-                                    class="close" onclick="closeCustomerModal()">✕</button>
+                                <h3 id="customer-modal-title">Tambah Pelanggan</h3>
+                                <button aria-label="Tutup" class="close" onclick="closeCustomerModal()">✕</button>
                             </div>
-                            <form id="customer-form"><input id="customer-id" type="hidden" />
+                            <form id="customer-form">
+                                <input id="customer-id" type="hidden" />
                                 <div class="form-grid">
-                                    <div class="form-group full"><label for="customer-name">Nama Lengkap *</label><input
-                                            class="field" id="customer-name" maxlength="60" minlength="2"
-                                            placeholder="Nama pelanggan" required="" /></div>
-                                    <div class="form-group"><label for="customer-phone">Nomor Telepon *</label><input
-                                            class="field" id="customer-phone" maxlength="15" minlength="8"
-                                            placeholder="08xxxxxxxxxx" required="" type="tel" /></div>
-                                    <div class="form-group"><label for="customer-address">Alamat *</label><input
-                                            class="field" id="customer-address" minlength="3"
-                                            placeholder="Alamat pelanggan" required="" /></div>
+                                    <div class="form-group full">
+                                        <label for="customer-name">Nama Lengkap *</label>
+                                        <input class="field" id="customer-name" maxlength="60" minlength="2"
+                                            placeholder="Nama pelanggan" required="" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="customer-phone">Nomor Telepon *</label>
+                                        <input class="field" id="customer-phone" maxlength="15" minlength="8"
+                                            placeholder="08xxxxxxxxxx" required="" type="tel" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="customer-address">Alamat *</label>
+                                        <input class="field" id="customer-address" minlength="3"
+                                            placeholder="Alamat pelanggan" required="" />
+                                    </div>
                                 </div>
-                                <div class="form-actions"><button class="btn btn-light" onclick="closeCustomerModal()"
-                                        type="button">Batal</button><button class="btn btn-primary" type="submit">Simpan
-                                        Pelanggan</button></div>
+                                <div class="form-actions">
+                                    <button class="btn btn-light" onclick="closeCustomerModal()" type="button">Batal</button>
+                                    <button class="btn btn-primary" type="submit">Simpan Pelanggan</button>
+                                </div>
                             </form>
                         </section>
                     </div>
                 </section>
+
+                <!-- ==================== ADMIN: LAPORAN ==================== -->
                 <section class="view" data-view="reports" hidden>
                     <div class="page-intro">
                         <div>
@@ -270,8 +437,7 @@
                     </div>
                     <section class="stats">
                         <article class="stat-card">
-                            <div class="stat-top"><span>Nilai Seluruh Pesanan</span><span class="stat-icon">Rp</span>
-                            </div>
+                            <div class="stat-top"><span>Nilai Seluruh Pesanan</span><span class="stat-icon">Rp</span></div>
                             <div class="stat-value" id="report-total">Rp0</div>
                             <div class="stat-foot">Akumulasi nilai pesanan</div>
                         </article>
@@ -296,7 +462,7 @@
                             <div class="panel-head">
                                 <div>
                                     <h3>Status Pengerjaan</h3>
-                                    <p>Jumlah pesanan berdasarkan status.</p>
+                                    <p>Jumlah pesanan berdasarkan tahapan status.</p>
                                 </div>
                             </div>
                             <div class="bar-list" id="status-bars"></div>
@@ -305,8 +471,7 @@
                             <div class="panel-head">
                                 <h3>Catatan Laporan</h3>
                             </div>
-                            <div class="notice">Laporan dihitung langsung dari data pesanan yang tersimpan. Perubahan
-                                pada halaman Manajemen Pesanan akan otomatis memperbarui ringkasan ini.</div>
+                            <div class="notice">Laporan dihitung langsung dari data pesanan yang tersimpan. Pembayaran simulasi oleh Customer akan otomatis memperbarui status Lunas pada laporan ini.</div>
                         </aside>
                     </section>
                     <section class="table-panel">
@@ -319,6 +484,7 @@
                                         <th>Tanggal</th>
                                         <th>Pelanggan</th>
                                         <th>Layanan</th>
+                                        <th>Status</th>
                                         <th>Total</th>
                                         <th>Pembayaran</th>
                                     </tr>
@@ -328,11 +494,306 @@
                         </div>
                     </section>
                 </section>
+
+                <!-- ==================== CUSTOMER: DASHBOARD & TRACKING ==================== -->
+                <section class="view" data-view="customer-dashboard" hidden>
+                    <div class="customer-hero">
+                        <div>
+                            <span class="badge-pill badge-customer">PORTAL PELANGGAN BOBASOLAUNDRY</span>
+                            <h2>Cek Status Cucian &amp; Tagihan Laundry Anda</h2>
+                            <p>Cari pesanan menggunakan nama pelanggan atau kode pesanan beserta nomor telepon untuk melihat perkembangan cucian dan melakukan pembayaran.</p>
+                        </div>
+                    </div>
+
+                    <!-- 1. Search Order Card -->
+                    <section class="panel customer-search-panel">
+                        <div class="panel-head">
+                            <div>
+                                <h3>1. Cari Pesanan Laundry</h3>
+                                <p>Masukkan Nama Pelanggan atau Kode/ID Pesanan (contoh: <code>#1</code> atau nama Anda). Gunakan nomor telepon sebagai verifikasi opsional/keamanan.</p>
+                            </div>
+                        </div>
+                        <form id="customer-track-form" class="customer-search-grid">
+                            <div class="form-group">
+                                <label for="track-query">Nama Pelanggan / ID Pesanan *</label>
+                                <input class="field" id="track-query" type="text" placeholder="Contoh: Andi atau #1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="track-phone">Nomor Telepon (Verifikasi)</label>
+                                <input class="field" id="track-phone" type="tel" placeholder="Contoh: 0812xxxxxxxx (opsional / 4 digit akhir)">
+                            </div>
+                            <div class="form-group customer-search-btn-wrap">
+                                <button type="submit" class="btn btn-primary">⌕ Cari Pesanan</button>
+                                <button type="button" class="btn btn-light" onclick="resetCustomerSearch()">Reset</button>
+                            </div>
+                        </form>
+                        <div id="customer-quick-chips" class="quick-chips"></div>
+                    </section>
+
+                    <!-- Pesan hasil pencarian / daftar pesanan cocok -->
+                    <div id="customer-search-feedback" hidden></div>
+
+                    <!-- Daftar pilihan jika ditemukan >1 pesanan -->
+                    <section id="customer-matches-panel" class="panel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Daftar Pesanan Ditemukan</h3>
+                                <p>Pilih salah satu pesanan di bawah ini untuk melihat rincian tracking dan tagihan.</p>
+                            </div>
+                        </div>
+                        <div id="customer-matches-list" class="matches-grid"></div>
+                    </section>
+
+                    <!-- Area Detail, Tracking, dan Pembayaran -->
+                    <div id="customer-order-view" hidden>
+                        <!-- 3. Laundry Tracking Timeline -->
+                        <section class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <h3>2. Status Perkembangan Laundry (Laundry Tracking)</h3>
+                                    <p>Status diperbarui oleh Admin dan tersinkronisasi dari Local Storage.</p>
+                                </div>
+                                <span id="cust-current-status-badge" class="status status-menunggu">Menunggu</span>
+                            </div>
+
+                            <div class="tracking-progress-bar">
+                                <div class="tracking-progress-fill" id="cust-tracking-fill" style="width: 16%"></div>
+                            </div>
+                            <div class="tracking-steps" id="cust-tracking-steps"></div>
+                        </section>
+
+                        <!-- 2. Order Details & 4. Pembayaran Customer -->
+                        <section class="two-col customer-detail-grid">
+                            <!-- Card Rincian Pesanan -->
+                            <article class="panel">
+                                <div class="panel-head">
+                                    <div>
+                                        <h3>3. Rincian Pesanan</h3>
+                                        <p>Informasi lengkap transaksi laundry Anda.</p>
+                                    </div>
+                                    <strong id="cust-detail-code" class="order-code-tag">#1</strong>
+                                </div>
+                                <div class="detail-card-grid">
+                                    <div class="detail-item">
+                                        <span>Nama Pelanggan</span>
+                                        <strong id="cust-detail-name">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Kode / ID Pesanan</span>
+                                        <strong id="cust-detail-id">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Nomor Telepon</span>
+                                        <strong id="cust-detail-phone">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Tanggal Masuk</span>
+                                        <strong id="cust-detail-date">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Estimasi Selesai</span>
+                                        <strong id="cust-detail-eta">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Jenis Layanan</span>
+                                        <strong id="cust-detail-service">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Berat Laundry</span>
+                                        <strong id="cust-detail-weight">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Harga per Kilogram</span>
+                                        <strong id="cust-detail-price">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Catatan Pesanan</span>
+                                        <strong id="cust-detail-note">-</strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span>Status Pembayaran</span>
+                                        <span id="cust-detail-pay-badge" class="pay pay-belum">Belum Lunas</span>
+                                    </div>
+                                </div>
+                                <div class="detail-total-box">
+                                    <span>Total Biaya Laundry</span>
+                                    <strong id="cust-detail-total">Rp0</strong>
+                                </div>
+                            </article>
+
+                            <!-- Card Pembayaran Simulasi -->
+                            <aside class="panel payment-sim-panel">
+                                <div class="panel-head">
+                                    <div>
+                                        <h3>4. Pembayaran Tagihan</h3>
+                                        <p>Simulasi pembayaran online pelanggan.</p>
+                                    </div>
+                                    <span class="demo-tag">SIMULASI / DEMO</span>
+                                </div>
+
+                                <div class="notice demo-warning">
+                                    <strong>Mode Simulasi (DEMO):</strong> Fitur ini hanya simulasi frontend berbasis Local Storage untuk keperluan Final Project kuliah, bukan transaksi uang sungguhan.
+                                </div>
+
+                                <div class="payment-summary-card">
+                                    <div class="summary-row">
+                                        <span>Nomor Pesanan</span>
+                                        <strong id="pay-order-code">#-</strong>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Nama Pelanggan</span>
+                                        <strong id="pay-customer-name">-</strong>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Status Tagihan</span>
+                                        <span id="pay-status-badge" class="pay pay-belum">Belum Lunas</span>
+                                    </div>
+                                    <div class="summary-row total-row">
+                                        <span>Total Tagihan</span>
+                                        <strong id="pay-total-amount">Rp0</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Form Pilih Metode jika Belum Lunas -->
+                                <div id="payment-action-area">
+                                    <div class="form-group" style="margin-top:14px">
+                                        <label>Pilih Metode Pembayaran (Simulasi) *</label>
+                                        <div class="pay-method-options">
+                                            <label class="pay-method-card active" id="label-method-qris">
+                                                <input type="radio" name="sim-pay-method" value="QRIS (Simulasi)" checked onchange="updatePaymentMethodPreview()">
+                                                <div>
+                                                    <strong>QRIS (Simulasi)</strong>
+                                                    <small>Scan QR Code instan (Demo)</small>
+                                                </div>
+                                            </label>
+                                            <label class="pay-method-card" id="label-method-bank">
+                                                <input type="radio" name="sim-pay-method" value="Transfer Bank (Simulasi)" onchange="updatePaymentMethodPreview()">
+                                                <div>
+                                                    <strong>Transfer Bank (Simulasi)</strong>
+                                                    <small>Virtual Account Bank (Demo)</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Preview QRIS / Transfer Bank -->
+                                    <div id="pay-preview-qris" class="pay-method-preview">
+                                        <div class="qris-mock">
+                                            <div class="qris-box" aria-hidden="true">
+                                                <div class="qr-pattern"></div>
+                                            </div>
+                                            <div>
+                                                <strong>QRIS BobasoLaundry (DEMO)</strong>
+                                                <p>NMID: ID102026BOBASODEMO</p>
+                                                <small>Klik tombol di bawah untuk mensimulasikan pembayaran berhasil.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="pay-preview-bank" class="pay-method-preview" hidden>
+                                        <div class="bank-mock">
+                                            <div class="summary-row"><span>Bank Tujuan (Demo)</span><strong>Bank BCA / Mandiri Virtual Account</strong></div>
+                                            <div class="summary-row"><span>Nomor VA Simulasi</span><code>8801 2026 0000 1234</code></div>
+                                            <div class="summary-row"><span>Atas Nama</span><strong>BobasoLaundry Demo</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary btn-block" style="margin-top:16px" onclick="processSimulatedPayment()">
+                                        ✓ Bayar Sekarang (Simulasi DEMO)
+                                    </button>
+                                </div>
+
+                                <!-- Info jika Sudah Lunas -->
+                                <div id="payment-paid-area" class="paid-confirmation-box" hidden>
+                                    <div class="paid-icon">✓</div>
+                                    <h4>Tagihan Sudah Lunas</h4>
+                                    <p id="paid-info-text">Pembayaran telah tercatat pada sistem.</p>
+                                    <button type="button" class="btn btn-light btn-block" onclick="openReceiptModal()">
+                                        ⎙ Lihat &amp; Cetak Bukti Pembayaran (DEMO)
+                                    </button>
+                                </div>
+                            </aside>
+                        </section>
+                    </div>
+                </section>
+
+                <!-- ==================== CUSTOMER: RIWAYAT PEMBAYARAN ==================== -->
+                <section class="view" data-view="customer-history" hidden>
+                    <div class="page-intro">
+                        <div>
+                            <h2>Riwayat Pembayaran Saya</h2>
+                            <p>Daftar transaksi pembayaran simulasi (DEMO) yang telah dilakukan.</p>
+                        </div>
+                        <button class="btn btn-light" onclick="showView('customer-dashboard')" type="button">← Kembali ke Lacak Pesanan</button>
+                    </div>
+                    <section class="table-panel">
+                        <div class="table-tools">
+                            <input aria-label="Filter riwayat pembayaran" class="field search" id="cust-history-search"
+                                placeholder="Cari nama pelanggan atau ID pesanan..." type="search" />
+                            <span class="demo-tag">HISTORI SIMULASI / DEMO</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>No. Referensi</th>
+                                        <th>ID Pesanan</th>
+                                        <th>Pelanggan</th>
+                                        <th>Metode Pembayaran</th>
+                                        <th>Waktu Bayar</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Bukti</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customer-history-body"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </section>
             </main>
-            <footer class="footer">© 2026 BobasoLaundry · Sistem Manajemen Laundry sederhana berbasis HTML, CSS &
-                JavaScript.</footer>
+
+            <footer class="footer">© 2026 BobasoLaundry · Sistem Manajemen Laundry &amp; Portal Pelanggan berbasis HTML, CSS &amp; Vanilla JavaScript.</footer>
         </div>
     </div>
+
+    <!-- ==================== MODAL BUKTI PEMBAYARAN (SIMULASI) ==================== -->
+    <div class="modal-backdrop" id="receipt-modal">
+        <section aria-labelledby="receipt-modal-title" aria-modal="true" class="modal receipt-modal-box" role="dialog">
+            <div class="modal-head no-print">
+                <h3 id="receipt-modal-title">Bukti Pembayaran (Simulasi DEMO)</h3>
+                <button aria-label="Tutup" class="close" onclick="closeReceiptModal()">✕</button>
+            </div>
+            <div id="receipt-printable" class="receipt-paper">
+                <div class="receipt-header">
+                    <div class="brand-mark">L</div>
+                    <div>
+                        <h3>BobasoLaundry</h3>
+                        <small>Bukti Pembayaran Laundry · SIMULASI / DEMO</small>
+                    </div>
+                    <span class="demo-tag">DEMO</span>
+                </div>
+                <div class="receipt-body">
+                    <div class="summary-row"><span>No. Referensi</span><strong id="rcp-ref">-</strong></div>
+                    <div class="summary-row"><span>Kode Pesanan</span><strong id="rcp-order-id">-</strong></div>
+                    <div class="summary-row"><span>Nama Pelanggan</span><strong id="rcp-customer">-</strong></div>
+                    <div class="summary-row"><span>Layanan &amp; Berat</span><strong id="rcp-service">-</strong></div>
+                    <div class="summary-row"><span>Metode Pembayaran</span><strong id="rcp-method">-</strong></div>
+                    <div class="summary-row"><span>Tanggal Pembayaran</span><strong id="rcp-date">-</strong></div>
+                    <div class="summary-row"><span>Status</span><strong style="color:var(--green)">LUNAS (SIMULASI)</strong></div>
+                    <div class="summary-row receipt-total"><span>Total Dibayar</span><strong id="rcp-total">Rp0</strong></div>
+                </div>
+                <div class="receipt-footer">
+                    Bukti ini dihasilkan dari simulasi pembayaran Local Storage untuk demonstrasi proyek kuliah (bukan transaksi uang sungguhan).
+                </div>
+            </div>
+            <div class="form-actions no-print">
+                <button type="button" class="btn btn-light" onclick="closeReceiptModal()">Tutup</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">⎙ Cetak Bukti Pembayaran</button>
+            </div>
+        </section>
+    </div>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
 </body>
